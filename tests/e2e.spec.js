@@ -111,9 +111,10 @@ test.describe('Lo-Fi Sequencer 95 E2E Tests (Expanded)', () => {
     const stepButtons = grid.locator('.step-button');
     await expect(stepButtons.nth(0)).toHaveClass(/active/); // First kick
 
-    // Verify at least one more step is activated
+    // Verify multiple steps are activated (preset repeated across 128 steps)
     const activeButtons = grid.locator('.step-button.active');
-    await expect(activeButtons).toHaveCountGreaterThan(1);
+    const count = await activeButtons.count();
+    expect(count).toBeGreaterThan(5);
   });
 
   test('Grid should have 6 tracks and 128 steps by default', async ({ page }) => {

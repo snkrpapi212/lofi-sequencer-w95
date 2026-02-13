@@ -960,10 +960,22 @@ class LoFiSequencer {
         }
 
         for (let track = 0; track < this.tracks; track++) {
-            if (pattern[track].length !== this.steps) {
-                throw new Error(`Each track must have exactly ${this.steps} steps`);
+            // If preset pattern is shorter than current steps, repeat it
+            if (pattern[track].length < this.steps) {
+                this.pattern[track] = [];
+                const repeatCount = Math.ceil(this.steps / pattern[track].length);
+                for (let i = 0; i < repeatCount; i++) {
+                    this.pattern[track] = this.pattern[track].concat(pattern[track]);
+                }
+                // Trim to exact length
+                this.pattern[track] = this.pattern[track].slice(0, this.steps);
+            } else if (pattern[track].length > this.steps) {
+                // If preset is longer, truncate it
+                this.pattern[track] = pattern[track].slice(0, this.steps);
+            } else {
+                // Exact match
+                this.pattern[track] = [...pattern[track]];
             }
-            this.pattern[track] = [...pattern[track]];
         }
 
         // Update visual buttons
