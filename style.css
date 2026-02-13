@@ -217,6 +217,18 @@ body::after {
     font-weight: normal;
 }
 
+/* Loop control */
+.loop-control {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+}
+
+.loop-control label {
+    font-weight: normal;
+}
+
 .win95-select {
     background-color: #ffffff;
     border: 2px solid;
@@ -472,7 +484,8 @@ body::after {
 
     .tempo-control,
     .preset-control,
-    .steps-control {
+    .steps-control,
+    .loop-control {
         justify-content: space-between;
         flex-wrap: wrap;
     }

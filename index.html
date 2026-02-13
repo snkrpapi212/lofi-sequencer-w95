@@ -40,9 +40,23 @@
                 <div class="steps-control">
                     <label for="stepsSelect">Length:</label>
                     <select id="stepsSelect" class="win95-select">
-                        <option value="16">16 steps</option>
-                        <option value="32" selected>32 steps</option>
-                        <option value="64">64 steps</option>
+                        <option value="16">16 steps (1 bar)</option>
+                        <option value="32">32 steps (2 bars)</option>
+                        <option value="64">64 steps (4 bars)</option>
+                        <option value="128" selected>128 steps (8 bars)</option>
+                        <option value="256">256 steps (16 bars)</option>
+                        <option value="512">512 steps (32 bars)</option>
+                    </select>
+                </div>
+
+                <div class="loop-control">
+                    <label for="loopSelect">Play Mode:</label>
+                    <select id="loopSelect" class="win95-select">
+                        <option value="infinite">Loop forever</option>
+                        <option value="1">Play once</option>
+                        <option value="2">Loop 2x</option>
+                        <option value="4">Loop 4x</option>
+                        <option value="8">Loop 8x</option>
                     </select>
                 </div>
 

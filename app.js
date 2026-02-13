@@ -13,11 +13,13 @@ class LoFiSequencer {
      * @param {Object} config - Configuration options
      */
     constructor(config = {}) {
-        this.steps = config.steps || 32;  // Expanded to 32 steps (2 bars)
+        this.steps = config.steps || 128;  // Expanded to 128 steps (8 bars - full verse/chorus)
         this.tracks = config.tracks || 6;  // Expanded to 6 tracks
         this.bpm = config.bpm || 85;
         this.isPlaying = false;
         this.currentStep = 0;
+        this.loopCount = 0;
+        this.maxLoops = 0;  // 0 = infinite loops
         this.pattern = [];
 
         // Track names
@@ -45,6 +47,7 @@ class LoFiSequencer {
         this.presetSelect = null;
         this.loadPresetBtn = null;
         this.stepsSelect = null;
+        this.loopSelect = null;
 
         // Define artist-inspired presets
         this.presets = this.createPresets();
@@ -61,26 +64,36 @@ class LoFiSequencer {
         };
 
         // Helper to create empty pattern
-        const empty32 = () => new Array(32).fill(false);
+        const empty128 = () => new Array(128).fill(false);
 
-        // Helper to create basic patterns
-        const fourOnFloor = (kick) => {
-            const p = new Array(32).fill(false);
-            for (let i = 0; i < 32; i += 4) p[i] = true;
+        // Helper to create basic patterns for 128 steps (8 bars)
+        const fourOnFloor = () => {
+            const p = new Array(128).fill(false);
+            for (let i = 0; i < 128; i += 4) p[i] = true;
             return p;
         };
 
         const eighthHats = () => {
-            const p = new Array(32).fill(false);
-            for (let i = 0; i < 32; i += 2) p[i] = true;
+            const p = new Array(128).fill(false);
+            for (let i = 0; i < 128; i += 2) p[i] = true;
             return p;
         };
 
-        const sixteenthHats = () => new Array(32).fill(true);
+        const sixteenthHats = () => new Array(128).fill(true);
 
         const twoFourSnare = () => {
-            const p = new Array(32).fill(false);
-            p[4] = true; p[12] = true; p[20] = true; p[28] = true;
+            const p = new Array(128).fill(false);
+            for (let i = 4; i < 128; i += 16) { p[i] = true; }  // Every bar
+            return p;
+        };
+
+        const boomBapKick = () => {
+            const p = new Array(128).fill(false);
+            // Classic boom bap kick pattern over 8 bars
+            const pattern = [1,0,0,0, 0,0,1,0, 1,0,0,1, 0,0,1,0];  // 16 steps
+            for (let i = 0; i < 128; i++) {
+                p[i] = pattern[i % 16] === 1;
+            }
             return p;
         };
 
@@ -293,6 +306,7 @@ class LoFiSequencer {
         this.presetSelect = document.getElementById('presetSelect');
         this.loadPresetBtn = document.getElementById('loadPresetBtn');
         this.stepsSelect = document.getElementById('stepsSelect');
+        this.loopSelect = document.getElementById('loopSelect');
     }
 
     /**
@@ -377,6 +391,12 @@ class LoFiSequencer {
             this.changeSteps(parseInt(e.target.value, 10));
         });
 
+        // Loop selector
+        this.loopSelect.addEventListener('change', (e) => {
+            this.maxLoops = e.target.value === 'infinite' ? 0 : parseInt(e.target.value, 10);
+            this.updateStatus(`Loop mode: ${e.target.value === 'infinite' ? 'Infinite' : e.target.value + ' times'}`);
+        });
+
         // Keyboard shortcuts
         document.addEventListener('keydown', (e) => {
             if (e.code === 'Space') {
@@ -408,12 +428,19 @@ class LoFiSequencer {
      * Populate steps dropdown
      */
     populateSteps() {
-        const stepsOptions = [16, 32, 64];
+        const stepsOptions = [
+            { value: 16, text: '16 steps (1 bar)' },
+            { value: 32, text: '32 steps (2 bars)' },
+            { value: 64, text: '64 steps (4 bars)' },
+            { value: 128, text: '128 steps (8 bars)' },
+            { value: 256, text: '256 steps (16 bars)' },
+            { value: 512, text: '512 steps (32 bars)' }
+        ];
         stepsOptions.forEach(steps => {
             const option = document.createElement('option');
-            option.value = steps;
-            option.textContent = `${steps} steps`;
-            option.selected = steps === this.steps;
+            option.value = steps.value;
+            option.textContent = steps.text;
+            option.selected = steps.value === this.steps;
             this.stepsSelect.appendChild(option);
         });
     }
@@ -519,11 +546,14 @@ class LoFiSequencer {
 
         this.isPlaying = true;
         this.currentStep = 0;
+        this.loopCount = 0;
         this.nextNoteTime = this.audioContext.currentTime;
 
         this.playStopBtn.innerHTML = '<span id="playIcon">■</span> Stop';
         this.playStopBtn.classList.add('playing');
-        this.updateStatus('Playing...');
+
+        const loopMode = this.maxLoops === 0 ? 'Infinite' : `${this.maxLoops}x`;
+        this.updateStatus(`Playing... (Loop: ${loopMode})`);
 
         // Start the scheduler
         this.scheduler();
@@ -542,7 +572,9 @@ class LoFiSequencer {
 
         this.playStopBtn.innerHTML = '<span id="playIcon">▶</span> Play';
         this.playStopBtn.classList.remove('playing');
-        this.updateStatus('Stopped');
+
+        const totalLoops = this.loopCount > 0 ? ` (${this.loopCount} loops)` : '';
+        this.updateStatus(`Stopped${totalLoops}`);
 
         // Clear current step indicator
         this.clearCurrentStepIndicator();
@@ -570,7 +602,25 @@ class LoFiSequencer {
     advanceNote() {
         const secondsPerBeat = 60.0 / this.bpm;
         this.nextNoteTime += 0.25 * secondsPerBeat; // 16th notes
+
+        const oldStep = this.currentStep;
         this.currentStep = (this.currentStep + 1) % this.steps;
+
+        // Check if we've completed a full loop (step went from last to first)
+        if (this.currentStep === 0 && oldStep === this.steps - 1) {
+            this.loopCount++;
+
+            // Check if we've reached max loops
+            if (this.maxLoops > 0 && this.loopCount >= this.maxLoops) {
+                this.stop();
+                return;
+            }
+
+            // Update status to show loop progress
+            if (this.maxLoops > 0) {
+                this.updateStatus(`Playing... Loop ${this.loopCount}/${this.maxLoops}`);
+            }
+        }
     }
 
     /**
@@ -931,7 +981,7 @@ class LoFiSequencer {
 // Initialize the sequencer when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
     window.sequencer = new LoFiSequencer({
-        steps: 32,
+        steps: 128,
         tracks: 6,
         bpm: 85
     });

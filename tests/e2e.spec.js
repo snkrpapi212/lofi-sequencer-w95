@@ -107,12 +107,16 @@ test.describe('Lo-Fi Sequencer 95 E2E Tests (Expanded)', () => {
     await expect(tempoSlider).toHaveValue('171');
     await expect(tempoValue).toHaveText('171');
 
-    // Verify some steps are activated
+    // Verify some steps are activated (presets fill first 32 steps of 128-step grid)
     const stepButtons = grid.locator('.step-button');
     await expect(stepButtons.nth(0)).toHaveClass(/active/); // First kick
+
+    // Verify at least one more step is activated
+    const activeButtons = grid.locator('.step-button.active');
+    await expect(activeButtons).toHaveCountGreaterThan(1);
   });
 
-  test('Grid should have 6 tracks and 32 steps by default', async ({ page }) => {
+  test('Grid should have 6 tracks and 128 steps by default', async ({ page }) => {
     const grid = page.locator('#sequencerGrid');
     const trackLabels = page.locator('#trackLabels');
     const stepNumbers = page.locator('#stepNumbers');
@@ -132,13 +136,13 @@ test.describe('Lo-Fi Sequencer 95 E2E Tests (Expanded)', () => {
     await expect(labels.nth(4)).toHaveText('Bass');
     await expect(labels.nth(5)).toHaveText('FX');
 
-    // Check number of step buttons (6 tracks × 32 steps = 192 buttons)
+    // Check number of step buttons (6 tracks × 128 steps = 768 buttons)
     const stepButtons = grid.locator('.step-button');
-    await expect(stepButtons).toHaveCount(192);
+    await expect(stepButtons).toHaveCount(768);
 
     // Check number of step numbers
     const numbers = stepNumbers.locator('.step-number');
-    await expect(numbers).toHaveCount(32);
+    await expect(numbers).toHaveCount(128);
   });
 
   test('Steps selector should change pattern length', async ({ page }) => {
@@ -148,23 +152,81 @@ test.describe('Lo-Fi Sequencer 95 E2E Tests (Expanded)', () => {
     // Wait for grid to be generated
     await grid.waitFor({ state: 'attached' });
 
-    // Default is 32 steps
+    // Default is 128 steps
     let stepButtons = grid.locator('.step-button');
+    await expect(stepButtons).toHaveCount(768); // 6 tracks × 128 steps
+
+    // Change to 32 steps
+    await stepsSelect.selectOption('32');
+    await page.waitForTimeout(100); // Wait for re-render
+
+    stepButtons = grid.locator('.step-button');
     await expect(stepButtons).toHaveCount(192); // 6 tracks × 32 steps
 
-    // Change to 16 steps
-    await stepsSelect.selectOption('16');
+    // Change to 256 steps
+    await stepsSelect.selectOption('256');
     await page.waitForTimeout(100); // Wait for re-render
 
     stepButtons = grid.locator('.step-button');
-    await expect(stepButtons).toHaveCount(96); // 6 tracks × 16 steps
+    await expect(stepButtons).toHaveCount(1536); // 6 tracks × 256 steps
+  });
 
-    // Change to 64 steps
-    await stepsSelect.selectOption('64');
+  test('Loop selector should control playback loops', async ({ page }) => {
+    const loopSelect = page.locator('#loopSelect');
+    const playStopBtn = page.locator('#playStopBtn');
+    const statusText = page.locator('#statusText');
+
+    // Wait for grid
+    await page.locator('#sequencerGrid').waitFor({ state: 'attached' });
+
+    // Default is infinite loops
+    await expect(loopSelect).toHaveValue('infinite');
+
+    // Change to play once
+    await loopSelect.selectOption('1');
+
+    // Click play
+    await playStopBtn.click();
+
+    // Verify status shows playing
+    await expect(statusText).toContainText('Playing');
+
+    // Click stop
+    await playStopBtn.click();
+
+    // Verify status shows stopped
+    await expect(statusText).toContainText('Stopped');
+  });
+
+  test('Long pattern (512 steps) should work correctly', async ({ page }) => {
+    const stepsSelect = page.locator('#stepsSelect');
+    const grid = page.locator('#sequencerGrid');
+    const stepNumbers = page.locator('#stepNumbers');
+
+    // Wait for grid to be generated
+    await grid.waitFor({ state: 'attached' });
+
+    // Change to 512 steps (32 bars - full song!)
+    await stepsSelect.selectOption('512');
     await page.waitForTimeout(100); // Wait for re-render
 
-    stepButtons = grid.locator('.step-button');
-    await expect(stepButtons).toHaveCount(384); // 6 tracks × 64 steps
+    // Check number of step buttons (6 tracks × 512 steps = 3072 buttons)
+    const stepButtons = grid.locator('.step-button');
+    await expect(stepButtons).toHaveCount(3072);
+
+    // Check number of step numbers
+    const numbers = stepNumbers.locator('.step-number');
+    await expect(numbers).toHaveCount(512);
+
+    // Verify first step button exists
+    await expect(stepButtons.nth(0)).toBeVisible();
+
+    // Click first step to activate
+    await stepButtons.nth(0).click();
+    await expect(stepButtons.nth(0)).toHaveClass(/active/);
+
+    // Verify last step button exists
+    await expect(stepButtons.nth(3071)).toBeVisible();
   });
 
   test('Multiple artist presets should work correctly', async ({ page }) => {
