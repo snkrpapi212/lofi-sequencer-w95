@@ -1,0 +1,26 @@
+{
+  "name": "lofi-sequencer-w95",
+  "version": "1.0.0",
+  "description": "A Windows 95-style lo-fi hip hop step sequencer",
+  "main": "app.js",
+  "scripts": {
+    "test": "node tests/node-test.js",
+    "test:browser": "Open tests/test.html in a web browser"
+  },
+  "keywords": [
+    "lo-fi",
+    "sequencer",
+    "music",
+    "windows-95",
+    "web-audio-api",
+    "beat-maker"
+  ],
+  "author": "snkrpapi212",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/snkrpapi212/lofi-sequencer-w95.git"
+  },
+  "devDependencies": {},
+  "dependencies": {}
+}
