@@ -21,6 +21,7 @@
     "type": "git",
     "url": "https://github.com/snkrpapi212/lofi-sequencer-w95.git"
   },
-  "devDependencies": {},
-  "dependencies": {}
+  "devDependencies": {
+    "@playwright/test": "^1.58.2"
+  }
 }

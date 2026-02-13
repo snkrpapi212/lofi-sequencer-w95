@@ -22,3 +22,9 @@ npm-debug.log*
 # Environment files
 .env
 .env.local
+
+# Playwright test artifacts
+test-results/
+playwright-report/
+playwright/.cache/
+
