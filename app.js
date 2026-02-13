@@ -52,6 +52,16 @@ class LoFiSequencer {
         // Define artist-inspired presets
         this.presets = this.createPresets();
 
+        // Artist-specific sound synthesis settings
+        this.soundSettings = {
+            kick: { type: 'sine', decay: 0.3, filterFreq: 200, filterDecay: 0.1, pitchStart: 150, pitchEnd: 40 },
+            snare: { noiseType: 'white', toneType: 'triangle', toneFreq: 200, toneDecay: 0.15, noiseDecay: 0.2 },
+            hihat: { freq: 7000, freqEnd: 5000, decay: 0.08, gain: 0.15 },
+            chord: { type: 'triangle', decay: 1.2, filterFreq: 800, filterQ: 1, detune: 2 },
+            bass: { type: 'sine', attack: 0.02, sustain: 0.15, decay: 0.8, freqStart: 65.41, freqEnd: 32.70 },
+            fx: { filterStart: 200, filterPeak: 2000, filterEnd: 400, filterQ: 10, decay: 0.35 }
+        };
+
         this.init();
     }
 
@@ -113,7 +123,15 @@ class LoFiSequencer {
                     [true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false],
                     // FX - whooshes and transitions
                     [false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,true,false,false,false,false,false,false,false,false,false,false,false,false,false,false,true]
-                )
+                ),
+                soundSettings: {
+                    kick: { type: 'sine', decay: 0.2, filterFreq: 300, filterDecay: 0.08, pitchStart: 200, pitchEnd: 60 },
+                    snare: { noiseType: 'white', toneType: 'triangle', toneFreq: 400, toneDecay: 0.08, noiseDecay: 0.15 },
+                    hihat: { freq: 9000, freqEnd: 6000, decay: 0.05, gain: 0.18 },
+                    chord: { type: 'sawtooth', decay: 0.5, filterFreq: 1200, filterQ: 2, detune: 5 },
+                    bass: { type: 'sawtooth', attack: 0.01, sustain: 0.1, decay: 0.4, freqStart: 87.31, freqEnd: 43.65 },
+                    fx: { filterStart: 500, filterPeak: 4000, filterEnd: 800, filterQ: 15, decay: 0.25 }
+                }
             },
 
             'Drake (Hotline Bling)': {
@@ -131,7 +149,15 @@ class LoFiSequencer {
                     [true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false],
                     // FX - ad-libs style hits
                     [false,false,true,false,false,false,false,false,false,false,true,false,false,false,false,false,false,false,true,false,false,false,false,false,false,false,false,false,true,false,false,false]
-                )
+                ),
+                soundSettings: {
+                    kick: { type: 'sine', decay: 0.35, filterFreq: 180, filterDecay: 0.12, pitchStart: 120, pitchEnd: 45 },
+                    snare: { noiseType: 'white', toneType: 'square', toneFreq: 250, toneDecay: 0.12, noiseDecay: 0.25 },
+                    hihat: { freq: 8000, freqEnd: 4000, decay: 0.06, gain: 0.12 },
+                    chord: { type: 'triangle', decay: 1.5, filterFreq: 600, filterQ: 0.5, detune: 3 },
+                    bass: { type: 'sine', attack: 0.03, sustain: 0.2, decay: 0.9, freqStart: 55.00, freqEnd: 27.50 },
+                    fx: { filterStart: 300, filterPeak: 2500, filterEnd: 500, filterQ: 8, decay: 0.3 }
+                }
             },
 
             'Lil Wayne (A Milli)': {
@@ -149,7 +175,15 @@ class LoFiSequencer {
                     [true,false,false,true,false,false,false,false,true,false,false,true,false,false,false,false,true,false,false,true,false,false,true,false,false,false,true,false,false,true,false,false,true],
                     // FX - vocal chop effects
                     [false,true,false,false,false,false,false,false,false,true,false,false,false,false,false,false,false,false,true,false,false,false,false,false,false,false,false,false,false,true,false,false]
-                )
+                ),
+                soundSettings: {
+                    kick: { type: 'sine', decay: 0.4, filterFreq: 150, filterDecay: 0.15, pitchStart: 100, pitchEnd: 35 },
+                    snare: { noiseType: 'white', toneType: 'triangle', toneFreq: 300, toneDecay: 0.1, noiseDecay: 0.18 },
+                    hihat: { freq: 7500, freqEnd: 4500, decay: 0.07, gain: 0.14 },
+                    chord: { type: 'square', decay: 0.8, filterFreq: 900, filterQ: 1.5, detune: 8 },
+                    bass: { type: 'sine', attack: 0.02, sustain: 0.18, decay: 1.0, freqStart: 58.27, freqEnd: 29.14 },
+                    fx: { filterStart: 400, filterPeak: 3000, filterEnd: 600, filterQ: 12, decay: 0.4 }
+                }
             },
 
             '50 Cent (In Da Club)': {
@@ -167,7 +201,15 @@ class LoFiSequencer {
                     [true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false],
                     // FX - Yeah! ad-libs
                     [false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,true,false,false,false,false,false]
-                )
+                ),
+                soundSettings: {
+                    kick: { type: 'sine', decay: 0.28, filterFreq: 250, filterDecay: 0.1, pitchStart: 160, pitchEnd: 50 },
+                    snare: { noiseType: 'white', toneType: 'triangle', toneFreq: 220, toneDecay: 0.18, noiseDecay: 0.22 },
+                    hihat: { freq: 7200, freqEnd: 4800, decay: 0.09, gain: 0.16 },
+                    chord: { type: 'triangle', decay: 1.0, filterFreq: 700, filterQ: 1, detune: 2 },
+                    bass: { type: 'sine', attack: 0.025, sustain: 0.16, decay: 0.75, freqStart: 61.74, freqEnd: 30.87 },
+                    fx: { filterStart: 250, filterPeak: 2200, filterEnd: 350, filterQ: 6, decay: 0.2 }
+                }
             },
 
             'Jay-Z (Empire State)': {
@@ -185,7 +227,15 @@ class LoFiSequencer {
                     [true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false],
                     // FX - New York atmosphere
                     [false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,true]
-                )
+                ),
+                soundSettings: {
+                    kick: { type: 'sine', decay: 0.32, filterFreq: 220, filterDecay: 0.11, pitchStart: 140, pitchEnd: 48 },
+                    snare: { noiseType: 'white', toneType: 'triangle', toneFreq: 240, toneDecay: 0.16, noiseDecay: 0.24 },
+                    hihat: { freq: 7800, freqEnd: 5200, decay: 0.085, gain: 0.13 },
+                    chord: { type: 'triangle', decay: 1.1, filterFreq: 850, filterQ: 1.2, detune: 2.5 },
+                    bass: { type: 'sine', attack: 0.03, sustain: 0.17, decay: 0.85, freqStart: 60.00, freqEnd: 30.00 },
+                    fx: { filterStart: 350, filterPeak: 2800, filterEnd: 450, filterQ: 9, decay: 0.28 }
+                }
             },
 
             'Kendrick Lamar (HUMBLE.)': {
@@ -203,7 +253,15 @@ class LoFiSequencer {
                     [true,false,false,true,false,false,false,false,true,false,false,true,false,false,false,false,true,false,false,true,false,false,true,false,false,false,true,false,false,true,false,false,true],
                     // FX - punchline effects
                     [false,false,true,false,false,false,false,false,false,true,false,false,false,false,false,false,false,false,true,false,false,false,false,false,false,false,false,false,false,true,false,false]
-                )
+                ),
+                soundSettings: {
+                    kick: { type: 'sine', decay: 0.25, filterFreq: 280, filterDecay: 0.09, pitchStart: 180, pitchEnd: 55 },
+                    snare: { noiseType: 'white', toneType: 'square', toneFreq: 280, toneDecay: 0.09, noiseDecay: 0.16 },
+                    hihat: { freq: 8500, freqEnd: 5500, decay: 0.055, gain: 0.11 },
+                    chord: { type: 'sawtooth', decay: 0.6, filterFreq: 1100, filterQ: 2.5, detune: 10 },
+                    bass: { type: 'sine', attack: 0.015, sustain: 0.12, decay: 0.5, freqStart: 65.41, freqEnd: 32.70 },
+                    fx: { filterStart: 450, filterPeak: 3500, filterEnd: 550, filterQ: 14, decay: 0.22 }
+                }
             },
 
             'Tupac (California Love)': {
@@ -221,7 +279,15 @@ class LoFiSequencer {
                     [true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false],
                     // FX - West Coast vibes
                     [false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,true]
-                )
+                ),
+                soundSettings: {
+                    kick: { type: 'sine', decay: 0.38, filterFreq: 200, filterDecay: 0.14, pitchStart: 130, pitchEnd: 42 },
+                    snare: { noiseType: 'white', toneType: 'triangle', toneFreq: 180, toneDecay: 0.2, noiseDecay: 0.26 },
+                    hihat: { freq: 7300, freqEnd: 4900, decay: 0.095, gain: 0.15 },
+                    chord: { type: 'triangle', decay: 1.4, filterFreq: 650, filterQ: 0.8, detune: 1.5 },
+                    bass: { type: 'sine', attack: 0.04, sustain: 0.19, decay: 0.95, freqStart: 56.00, freqEnd: 28.00 },
+                    fx: { filterStart: 280, filterPeak: 2400, filterEnd: 380, filterQ: 7, decay: 0.32 }
+                }
             },
 
             'Eminem (Lose Yourself)': {
@@ -239,11 +305,18 @@ class LoFiSequencer {
                     [true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false],
                     // FX - drum fills
                     [false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false]
-                )
+                ),
+                soundSettings: {
+                    kick: { type: 'sine', decay: 0.22, filterFreq: 320, filterDecay: 0.07, pitchStart: 210, pitchEnd: 70 },
+                    snare: { noiseType: 'white', toneType: 'triangle', toneFreq: 450, toneDecay: 0.07, noiseDecay: 0.14 },
+                    hihat: { freq: 9200, freqEnd: 6200, decay: 0.045, gain: 0.19 },
+                    chord: { type: 'square', decay: 0.35, filterFreq: 1500, filterQ: 3, detune: 6 },
+                    bass: { type: 'triangle', attack: 0.008, sustain: 0.08, decay: 0.35, freqStart: 73.42, freqEnd: 36.71 },
+                    fx: { filterStart: 600, filterPeak: 5000, filterEnd: 900, filterQ: 18, decay: 0.18 }
+                }
             },
 
             'Biggie (Juicy)': {
-                bpm: 95,
                 bpm: 95,
                 pattern: createPattern(
                     // Kick - boom bap classic
@@ -258,7 +331,15 @@ class LoFiSequencer {
                     [true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false],
                     // FX - vinyl crackle
                     [false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false]
-                )
+                ),
+                soundSettings: {
+                    kick: { type: 'sine', decay: 0.34, filterFreq: 170, filterDecay: 0.13, pitchStart: 125, pitchEnd: 41 },
+                    snare: { noiseType: 'white', toneType: 'triangle', toneFreq: 210, toneDecay: 0.17, noiseDecay: 0.23 },
+                    hihat: { freq: 7600, freqEnd: 5100, decay: 0.09, gain: 0.14 },
+                    chord: { type: 'triangle', decay: 1.3, filterFreq: 750, filterQ: 0.9, detune: 2 },
+                    bass: { type: 'sine', attack: 0.035, sustain: 0.18, decay: 0.88, freqStart: 62.00, freqEnd: 31.00 },
+                    fx: { filterStart: 320, filterPeak: 2600, filterEnd: 420, filterQ: 8, decay: 0.3 }
+                }
             },
 
             'J. Cole (No Role Modelz)': {
@@ -276,7 +357,15 @@ class LoFiSequencer {
                     [true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false],
                     // FX - atmospheric
                     [false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false]
-                )
+                ),
+                soundSettings: {
+                    kick: { type: 'sine', decay: 0.45, filterFreq: 140, filterDecay: 0.18, pitchStart: 110, pitchEnd: 38 },
+                    snare: { noiseType: 'white', toneType: 'triangle', toneFreq: 190, toneDecay: 0.22, noiseDecay: 0.28 },
+                    hihat: { freq: 7000, freqEnd: 4600, decay: 0.11, gain: 0.12 },
+                    chord: { type: 'sine', decay: 2.0, filterFreq: 500, filterQ: 0.3, detune: 1 },
+                    bass: { type: 'sine', attack: 0.05, sustain: 0.25, decay: 1.2, freqStart: 52.00, freqEnd: 26.00 },
+                    fx: { filterStart: 200, filterPeak: 1800, filterEnd: 300, filterQ: 5, decay: 0.45 }
+                }
             }
         };
     }
@@ -497,6 +586,11 @@ class LoFiSequencer {
         // Set the pattern
         this.setPattern(preset.pattern);
 
+        // Apply artist-specific sound synthesis settings
+        if (preset.soundSettings) {
+            this.soundSettings = preset.soundSettings;
+        }
+
         this.updateStatus(`Loaded preset: ${selectedPreset} (${preset.bpm} BPM)`);
     }
 
@@ -709,23 +803,24 @@ class LoFiSequencer {
      * @param {number} time - The time to play
      */
     playKick(time) {
+        const settings = this.soundSettings.kick;
         const osc = this.audioContext.createOscillator();
         const gain = this.audioContext.createGain();
         const filter = this.audioContext.createBiquadFilter();
 
         // Lowpass filter for warmth
         filter.type = 'lowpass';
-        filter.frequency.setValueAtTime(200, time);
-        filter.frequency.exponentialRampToValueAtTime(50, time + 0.1);
+        filter.frequency.setValueAtTime(settings.filterFreq, time);
+        filter.frequency.exponentialRampToValueAtTime(50, time + settings.filterDecay);
 
         // Oscillator for the kick
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(150, time);
-        osc.frequency.exponentialRampToValueAtTime(40, time + 0.1);
+        osc.type = settings.type;
+        osc.frequency.setValueAtTime(settings.pitchStart, time);
+        osc.frequency.exponentialRampToValueAtTime(settings.pitchEnd, time + 0.1);
 
         // Envelope
         gain.gain.setValueAtTime(0.8, time);
-        gain.gain.exponentialRampToValueAtTime(0.01, time + 0.3);
+        gain.gain.exponentialRampToValueAtTime(0.01, time + settings.decay);
 
         // Connect nodes
         osc.connect(filter);
@@ -734,7 +829,7 @@ class LoFiSequencer {
 
         // Start and stop
         osc.start(time);
-        osc.stop(time + 0.3);
+        osc.stop(time + settings.decay);
     }
 
     /**
@@ -742,6 +837,7 @@ class LoFiSequencer {
      * @param {number} time - The time to play
      */
     playSnare(time) {
+        const settings = this.soundSettings.snare;
         // Noise component
         const noise = this.audioContext.createBufferSource();
         const noiseBuffer = this.createNoiseBuffer();
@@ -753,7 +849,7 @@ class LoFiSequencer {
 
         const noiseGain = this.audioContext.createGain();
         noiseGain.gain.setValueAtTime(0.3, time);
-        noiseGain.gain.exponentialRampToValueAtTime(0.01, time + 0.2);
+        noiseGain.gain.exponentialRampToValueAtTime(0.01, time + settings.noiseDecay);
 
         noise.connect(noiseFilter);
         noiseFilter.connect(noiseGain);
@@ -763,21 +859,21 @@ class LoFiSequencer {
         const osc = this.audioContext.createOscillator();
         const oscGain = this.audioContext.createGain();
 
-        osc.type = 'triangle';
-        osc.frequency.setValueAtTime(200, time);
+        osc.type = settings.toneType;
+        osc.frequency.setValueAtTime(settings.toneFreq, time);
         osc.frequency.exponentialRampToValueAtTime(150, time + 0.1);
 
         oscGain.gain.setValueAtTime(0.4, time);
-        oscGain.gain.exponentialRampToValueAtTime(0.01, time + 0.15);
+        oscGain.gain.exponentialRampToValueAtTime(0.01, time + settings.toneDecay);
 
         osc.connect(oscGain);
         oscGain.connect(this.audioContext.destination);
 
         // Start and stop
         noise.start(time);
-        noise.stop(time + 0.2);
+        noise.stop(time + settings.noiseDecay);
         osc.start(time);
-        osc.stop(time + 0.15);
+        osc.stop(time + settings.toneDecay);
     }
 
     /**
@@ -785,25 +881,26 @@ class LoFiSequencer {
      * @param {number} time - The time to play
      */
     playHiHat(time) {
+        const settings = this.soundSettings.hihat;
         const noise = this.audioContext.createBufferSource();
         const noiseBuffer = this.createNoiseBuffer(0.05);
         noise.buffer = noiseBuffer;
 
         const filter = this.audioContext.createBiquadFilter();
         filter.type = 'highpass';
-        filter.frequency.setValueAtTime(7000, time);
-        filter.frequency.exponentialRampToValueAtTime(5000, time + 0.05);
+        filter.frequency.setValueAtTime(settings.freq, time);
+        filter.frequency.exponentialRampToValueAtTime(settings.freqEnd, time + 0.05);
 
         const gain = this.audioContext.createGain();
-        gain.gain.setValueAtTime(0.15, time);
-        gain.gain.exponentialRampToValueAtTime(0.01, time + 0.08);
+        gain.gain.setValueAtTime(settings.gain, time);
+        gain.gain.exponentialRampToValueAtTime(0.01, time + settings.decay);
 
         noise.connect(filter);
         filter.connect(gain);
         gain.connect(this.audioContext.destination);
 
         noise.start(time);
-        noise.stop(time + 0.1);
+        noise.stop(time + settings.decay + 0.02);
     }
 
     /**
@@ -811,6 +908,7 @@ class LoFiSequencer {
      * @param {number} time - The time to play
      */
     playChord(time) {
+        const settings = this.soundSettings.chord;
         // C minor 7 chord with lo-fi character
         const chordFrequencies = [130.81, 155.56, 196.00, 233.08];
 
@@ -819,24 +917,24 @@ class LoFiSequencer {
             const gain = this.audioContext.createGain();
             const filter = this.audioContext.createBiquadFilter();
 
-            osc.type = 'triangle';
-            osc.frequency.setValueAtTime(freq + (Math.random() - 0.5) * 2, time);
+            osc.type = settings.type;
+            osc.frequency.setValueAtTime(freq + (Math.random() - 0.5) * settings.detune, time);
 
             filter.type = 'lowpass';
-            filter.frequency.setValueAtTime(800 + (Math.random() * 200), time);
-            filter.Q.setValueAtTime(1, time);
+            filter.frequency.setValueAtTime(settings.filterFreq + (Math.random() * 200), time);
+            filter.Q.setValueAtTime(settings.filterQ, time);
 
             gain.gain.setValueAtTime(0, time);
             gain.gain.linearRampToValueAtTime(0.1 - (i * 0.015), time + 0.05);
             gain.gain.exponentialRampToValueAtTime(0.08 - (i * 0.012), time + 0.3);
-            gain.gain.exponentialRampToValueAtTime(0.01, time + 1.2);
+            gain.gain.exponentialRampToValueAtTime(0.01, time + settings.decay);
 
             osc.connect(filter);
             filter.connect(gain);
             gain.connect(this.audioContext.destination);
 
             osc.start(time);
-            osc.stop(time + 1.3);
+            osc.stop(time + settings.decay + 0.1);
         });
     }
 
@@ -845,25 +943,26 @@ class LoFiSequencer {
      * @param {number} time - The time to play
      */
     playBass(time) {
+        const settings = this.soundSettings.bass;
         const osc = this.audioContext.createOscillator();
         const gain = this.audioContext.createGain();
 
         // Sine wave for sub bass
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(65.41, time); // C2
-        osc.frequency.exponentialRampToValueAtTime(32.70, time + 0.15);
+        osc.type = settings.type;
+        osc.frequency.setValueAtTime(settings.freqStart, time);
+        osc.frequency.exponentialRampToValueAtTime(settings.freqEnd, time + 0.15);
 
         // Envelope for punch
         gain.gain.setValueAtTime(0, time);
-        gain.gain.linearRampToValueAtTime(0.6, time + 0.02);
-        gain.gain.exponentialRampToValueAtTime(0.4, time + 0.15);
-        gain.gain.exponentialRampToValueAtTime(0.01, time + 0.8);
+        gain.gain.linearRampToValueAtTime(0.6, time + settings.attack);
+        gain.gain.exponentialRampToValueAtTime(0.4, time + settings.sustain);
+        gain.gain.exponentialRampToValueAtTime(0.01, time + settings.decay);
 
         osc.connect(gain);
         gain.connect(this.audioContext.destination);
 
         osc.start(time);
-        osc.stop(time + 0.9);
+        osc.stop(time + settings.decay + 0.1);
     }
 
     /**
@@ -871,7 +970,7 @@ class LoFiSequencer {
      * @param {number} time - The time to play
      */
     playFX(time) {
-        const osc = this.audioContext.createOscillator();
+        const settings = this.soundSettings.fx;
         const gain = this.audioContext.createGain();
         const filter = this.audioContext.createBiquadFilter();
 
@@ -882,21 +981,21 @@ class LoFiSequencer {
 
         // Bandpass filter for sweep
         filter.type = 'bandpass';
-        filter.frequency.setValueAtTime(200, time);
-        filter.frequency.exponentialRampToValueAtTime(2000, time + 0.15);
-        filter.frequency.exponentialRampToValueAtTime(400, time + 0.3);
-        filter.Q.setValueAtTime(10, time);
+        filter.frequency.setValueAtTime(settings.filterStart, time);
+        filter.frequency.exponentialRampToValueAtTime(settings.filterPeak, time + 0.15);
+        filter.frequency.exponentialRampToValueAtTime(settings.filterEnd, time + 0.3);
+        filter.Q.setValueAtTime(settings.filterQ, time);
 
         gain.gain.setValueAtTime(0, time);
         gain.gain.linearRampToValueAtTime(0.25, time + 0.1);
-        gain.gain.exponentialRampToValueAtTime(0.01, time + 0.35);
+        gain.gain.exponentialRampToValueAtTime(0.01, time + settings.decay);
 
         noise.connect(filter);
         filter.connect(gain);
         gain.connect(this.audioContext.destination);
 
         noise.start(time);
-        noise.stop(time + 0.4);
+        noise.stop(time + settings.decay + 0.05);
     }
 
     /**
