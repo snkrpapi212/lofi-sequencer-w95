@@ -1,10 +1,10 @@
 /**
  * ============================================
- * Lo-Fi Sequencer 95 - Main Application
+ * Lo-Fi Sequencer 95 - Main Application (Expanded)
  * ============================================
- * 
+ *
  * A Windows 95-style step sequencer with Web Audio API
- * for generating lo-fi hip hop sounds.
+ * for generating lo-fi hip hop sounds with artist-inspired presets
  */
 
 class LoFiSequencer {
@@ -13,12 +13,15 @@ class LoFiSequencer {
      * @param {Object} config - Configuration options
      */
     constructor(config = {}) {
-        this.steps = config.steps || 16;
-        this.tracks = config.tracks || 4;
+        this.steps = config.steps || 32;  // Expanded to 32 steps (2 bars)
+        this.tracks = config.tracks || 6;  // Expanded to 6 tracks
         this.bpm = config.bpm || 85;
         this.isPlaying = false;
         this.currentStep = 0;
         this.pattern = [];
+
+        // Track names
+        this.trackNames = ['Kick', 'Snare', 'Hi-Hat', 'Chord', 'Bass', 'FX'];
 
         // Initialize pattern grid
         for (let track = 0; track < this.tracks; track++) {
@@ -30,7 +33,7 @@ class LoFiSequencer {
         this.nextNoteTime = 0;
         this.timerID = null;
         this.lookahead = 25.0; // milliseconds
-        this.scheduleAheadTime = 0.1; // seconds
+        this.scheduleAheadTime = 0.1; // seconds;
 
         // DOM elements
         this.grid = null;
@@ -41,118 +44,230 @@ class LoFiSequencer {
         this.statusText = null;
         this.presetSelect = null;
         this.loadPresetBtn = null;
+        this.stepsSelect = null;
 
-        // Define presets
-        this.presets = {
-            'Classic Lo-Fi': {
-                bpm: 85,
-                pattern: [
-                    // Kick - classic lo-fi beat
-                    [true, false, false, false, true, false, false, false, true, false, false, false, true, false, false, false],
-                    // Snare - on beats 2 and 4
-                    [false, false, true, false, false, false, true, false, false, false, true, false, false, false, true, false],
-                    // Hi-Hat - 8th notes
-                    [true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false],
-                    // Chord - occasional stabs
-                    [false, false, false, false, true, false, false, false, false, false, false, false, true, false, false, false]
-                ]
-            },
-            'Boom Bap': {
-                bpm: 90,
-                pattern: [
-                    // Kick - heavy boom bap pattern
-                    [true, false, false, true, false, false, true, false, true, false, false, true, false, false, true, false],
-                    // Snare - classic 2 and 4 with some syncopation
-                    [false, false, true, false, false, false, true, false, false, false, true, false, false, false, true, false],
-                    // Hi-Hat - tight 16th notes
-                    [true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true],
-                    // Chord - occasional hits
-                    [false, false, true, false, false, false, false, false, false, false, true, false, false, false, false, false]
-                ]
-            },
-            'Trap': {
-                bpm: 140,
-                pattern: [
-                    // Kick - trap hi-hat rolls pattern
-                    [true, false, false, true, false, false, true, false, true, false, false, true, false, false, true, false],
-                    // Snare - heavy on 3 and 7
-                    [false, false, false, false, true, false, false, false, false, false, false, false, true, false, false, false],
-                    // Hi-Hat - rapid trap hats
-                    [true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true],
-                    // Chord - atmospheric stabs
-                    [false, false, false, false, true, false, false, false, false, false, false, false, true, false, false, false]
-                ]
-            },
-            'House': {
-                bpm: 124,
-                pattern: [
-                    // Kick - four-on-the-floor
-                    [true, false, false, false, true, false, false, false, true, false, false, false, true, false, false, false],
-                    // Snare - clap on 2 and 4
-                    [false, false, false, false, true, false, false, false, false, false, false, false, true, false, false, false],
-                    // Hi-Hat - off-beat hats
-                    [false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true],
-                    // Chord - house chord stabs
-                    [true, false, false, false, true, false, false, false, true, false, false, false, true, false, false, false]
-                ]
-            },
-            'Minimal Techno': {
-                bpm: 126,
-                pattern: [
-                    // Kick - minimal kick pattern
-                    [true, false, false, false, false, false, false, true, false, false, false, false, false, false, true, false],
-                    // Snare - occasional clap
-                    [false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false],
-                    // Hi-Hat - sparse techno hats
-                    [true, false, false, false, true, false, false, false, true, false, false, false, true, false, false, false],
-                    // Chord - minimal texture
-                    [false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false]
-                ]
-            },
-            'Downtempo': {
-                bpm: 75,
-                pattern: [
-                    // Kick - slow and deep
-                    [true, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false],
-                    // Snare - relaxed snare
-                    [false, false, false, false, true, false, false, false, false, false, false, false, true, false, false, false],
-                    // Hi-Hat - sparse hats
-                    [true, false, false, false, false, false, true, false, false, false, true, false, false, false, false, false],
-                    // Chord - rich chords
-                    [true, false, false, false, false, false, true, false, false, false, false, false, true, false, false, false]
-                ]
-            },
-            'Ambient': {
-                bpm: 65,
-                pattern: [
-                    // Kick - very sparse
-                    [true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false],
-                    // Snare - almost none
-                    [false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false],
-                    // Hi-Hat - distant
-                    [true, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false],
-                    // Chord - drifting pads
-                    [true, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false]
-                ]
-            },
-            'Reggaeton': {
-                bpm: 95,
-                pattern: [
-                    // Kick - dem bow pattern
-                    [true, false, false, true, false, false, true, false, true, false, false, true, false, false, true, false],
-                    // Snare - reggaeton snare
-                    [false, false, false, false, true, false, false, false, false, false, false, false, true, false, false, false],
-                    // Hi-Hat - dem bow hats
-                    [true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false],
-                    // Chord - occasional
-                    [false, false, false, false, true, false, false, false, false, false, false, false, true, false, false, false]
-                ]
-            }
-        };
+        // Define artist-inspired presets
+        this.presets = this.createPresets();
 
         this.init();
     }
-    
+
+    /**
+     * Create all artist-inspired presets
+     */
+    createPresets() {
+        const createPattern = (kick, snare, hihat, chord, bass, fx) => {
+            return [kick, snare, hihat, chord, bass, fx];
+        };
+
+        // Helper to create empty pattern
+        const empty32 = () => new Array(32).fill(false);
+
+        // Helper to create basic patterns
+        const fourOnFloor = (kick) => {
+            const p = new Array(32).fill(false);
+            for (let i = 0; i < 32; i += 4) p[i] = true;
+            return p;
+        };
+
+        const eighthHats = () => {
+            const p = new Array(32).fill(false);
+            for (let i = 0; i < 32; i += 2) p[i] = true;
+            return p;
+        };
+
+        const sixteenthHats = () => new Array(32).fill(true);
+
+        const twoFourSnare = () => {
+            const p = new Array(32).fill(false);
+            p[4] = true; p[12] = true; p[20] = true; p[28] = true;
+            return p;
+        };
+
+        return {
+            'The Weeknd (Blinding Lights)': {
+                bpm: 171,
+                pattern: createPattern(
+                    // Kick - driving four-on-floor with syncopation
+                    [true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false],
+                    // Snare - clap on 2 and 4
+                    [false,false,false,false,true,false,false,false,false,false,false,false,true,false,false,false,false,false,false,false,true,false,false,false,false,false,false,false,true,false,false,false],
+                    // Hi-Hat - 16th notes with open accents
+                    [true,true,true,true,true,true,true,false,true,true,true,true,true,true,true,false,true,true,true,true,true,true,true,false,true,true,true,true,true,true,true,true],
+                    // Chord - synth stabs
+                    [true,false,false,false,false,false,false,false,false,false,false,false,true,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false],
+                    // Bass - driving synth bass
+                    [true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false],
+                    // FX - whooshes and transitions
+                    [false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,true,false,false,false,false,false,false,false,false,false,false,false,false,false,false,true]
+                )
+            },
+
+            'Drake (Hotline Bling)': {
+                bpm: 135,
+                pattern: createPattern(
+                    // Kick - trap-influenced kick pattern
+                    [true,false,false,false,true,false,false,true,true,false,false,false,true,false,false,false,true,false,false,true,true,false,false,false,true,false,false,true,true,false,false,false],
+                    // Snare - sharp snares
+                    [false,false,false,false,true,false,false,false,false,false,false,false,true,false,false,false,false,false,false,false,true,false,false,false,false,false,false,false,true,false,false,false],
+                    // Hi-Hat - rapid trap hats
+                    [true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true],
+                    // Chord - pads
+                    [true,false,false,false,false,false,false,false,false,false,false,false,true,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false],
+                    // Bass - 808-style
+                    [true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false],
+                    // FX - ad-libs style hits
+                    [false,false,true,false,false,false,false,false,false,false,true,false,false,false,false,false,false,false,true,false,false,false,false,false,false,false,false,false,true,false,false,false]
+                )
+            },
+
+            'Lil Wayne (A Milli)': {
+                bpm: 84,
+                pattern: createPattern(
+                    // Kick - New Orleans bounce style
+                    [true,false,false,true,false,false,true,false,true,false,false,true,false,false,true,false,true,false,false,true,false,false,true,false,false,true,false,false,true,false,false,true,false],
+                    // Snare - snappy snares
+                    [false,false,false,false,true,false,false,false,false,false,false,false,true,false,false,false,false,false,false,false,true,false,false,false,false,false,false,false,true,false,false,false],
+                    // Hi-Hat - 16th notes
+                    sixteenthHats(),
+                    // Chord - southern trap chords
+                    [true,false,false,false,false,false,false,false,true,false,false,false,false,false,false,false,true,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false],
+                    // Bass - heavy 808s
+                    [true,false,false,true,false,false,false,false,true,false,false,true,false,false,false,false,true,false,false,true,false,false,true,false,false,false,true,false,false,true,false,false,true],
+                    // FX - vocal chop effects
+                    [false,true,false,false,false,false,false,false,false,true,false,false,false,false,false,false,false,false,true,false,false,false,false,false,false,false,false,false,false,true,false,false]
+                )
+            },
+
+            '50 Cent (In Da Club)': {
+                bpm: 91,
+                pattern: createPattern(
+                    // Kick - iconic 50 Cent kick
+                    [true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false],
+                    // Snare - hard-hitting snares
+                    [false,false,false,false,true,false,false,false,false,false,false,false,true,false,false,false,false,false,false,false,true,false,false,false,false,false,false,false,true,false,false,false],
+                    // Hi-Hat - 8th notes
+                    eighthHats(),
+                    // Chord - minimal
+                    [true,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,true,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false],
+                    // Bass - G-Unit style
+                    [true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false],
+                    // FX - Yeah! ad-libs
+                    [false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,true,false,false,false,false,false]
+                )
+            },
+
+            'Jay-Z (Empire State)': {
+                bpm: 91,
+                pattern: createPattern(
+                    // Kick - Jay-Z's signature
+                    [true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false],
+                    // Snare - crisp snares
+                    [false,false,false,false,true,false,false,false,false,false,false,false,true,false,false,false,false,false,false,false,true,false,false,false,false,false,false,false,true,false,false,false],
+                    // Hi-Hat - smooth hats
+                    eighthHats(),
+                    // Chord - orchestral hits
+                    [true,false,false,false,false,false,false,false,false,false,false,false,true,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false],
+                    // Bass - rolling bass
+                    [true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false],
+                    // FX - New York atmosphere
+                    [false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,true]
+                )
+            },
+
+            'Kendrick Lamar (HUMBLE.)': {
+                bpm: 150,
+                pattern: createPattern(
+                    // Kick - trap kick
+                    [true,false,false,true,false,false,true,false,true,false,false,true,false,false,true,false,true,false,false,true,false,false,true,false,false,true,false,false,true,false,false,true,false],
+                    // Snare - punchy
+                    [false,false,false,false,true,false,false,false,false,false,false,false,true,false,false,false,false,false,false,false,true,false,false,false,false,false,false,false,true,false,false,false],
+                    // Hi-Hat - very fast trap hats
+                    sixteenthHats(),
+                    // Chord - ominous
+                    [true,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,true,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false],
+                    // Bass - dark 808s
+                    [true,false,false,true,false,false,false,false,true,false,false,true,false,false,false,false,true,false,false,true,false,false,true,false,false,false,true,false,false,true,false,false,true],
+                    // FX - punchline effects
+                    [false,false,true,false,false,false,false,false,false,true,false,false,false,false,false,false,false,false,true,false,false,false,false,false,false,false,false,false,false,true,false,false]
+                )
+            },
+
+            'Tupac (California Love)': {
+                bpm: 92,
+                pattern: createPattern(
+                    // Kick - West Coast funk
+                    [true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false],
+                    // Snare - funk snare
+                    [false,false,false,false,true,false,false,false,false,false,false,false,true,false,false,false,false,false,false,false,true,false,false,false,false,false,false,false,true,false,false,false],
+                    // Hi-Hat - G-Funk hats
+                    eighthHats(),
+                    // Chord - G-Funk synths
+                    [true,false,false,false,false,false,false,false,true,false,false,false,false,false,false,false,true,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false],
+                    // Bass - funk bass
+                    [true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false],
+                    // FX - West Coast vibes
+                    [false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,true]
+                )
+            },
+
+            'Eminem (Lose Yourself)': {
+                bpm: 171,
+                pattern: createPattern(
+                    // Kick - driving rock-rap beat
+                    [true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false],
+                    // Snare - rock snare
+                    [false,false,false,false,true,false,false,false,false,false,false,false,true,false,false,false,false,false,false,false,true,false,false,false,false,false,false,false,true,false,false,false],
+                    // Hi-Hat - fast hats
+                    [true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true],
+                    // Chord - piano stabs
+                    [true,false,false,false,false,false,false,false,false,false,false,false,true,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false],
+                    // Bass - bass guitar
+                    [true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false],
+                    // FX - drum fills
+                    [false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false]
+                )
+            },
+
+            'Biggie (Juicy)': {
+                bpm: 95,
+                bpm: 95,
+                pattern: createPattern(
+                    // Kick - boom bap classic
+                    [true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false],
+                    // Snare - classic snare
+                    [false,false,false,false,true,false,false,false,false,false,false,false,true,false,false,false,false,false,false,false,true,false,false,false,false,false,false,false,true,false,false,false],
+                    // Hi-Hat - crisp hats
+                    eighthHats(),
+                    // Chord - soul samples
+                    [true,false,false,false,false,false,false,false,true,false,false,false,false,false,false,false,true,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false],
+                    // Bass - deep bass
+                    [true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false],
+                    // FX - vinyl crackle
+                    [false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false]
+                )
+            },
+
+            'J. Cole (No Role Modelz)': {
+                bpm: 80,
+                pattern: createPattern(
+                    // Kick - laid-back beat
+                    [true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false],
+                    // Snare - relaxed snare
+                    [false,false,false,false,true,false,false,false,false,false,false,false,true,false,false,false,false,false,false,false,true,false,false,false,false,false,false,false,true,false,false,false],
+                    // Hi-Hat - smooth hats
+                    eighthHats(),
+                    // Chord - dreamy pads
+                    [true,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,true,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false],
+                    // Bass - smooth bass
+                    [true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false,true,false,false,false],
+                    // FX - atmospheric
+                    [false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false]
+                )
+            }
+        };
+    }
+
     /**
      * Initialize the application
      */
@@ -160,10 +275,11 @@ class LoFiSequencer {
         this.cacheDOM();
         this.renderGrid();
         this.populatePresets();
+        this.populateSteps();
         this.bindEvents();
         this.updateStatus('Ready to make beats...');
     }
-    
+
     /**
      * Cache DOM elements for better performance
      */
@@ -176,36 +292,54 @@ class LoFiSequencer {
         this.statusText = document.getElementById('statusText');
         this.presetSelect = document.getElementById('presetSelect');
         this.loadPresetBtn = document.getElementById('loadPresetBtn');
+        this.stepsSelect = document.getElementById('stepsSelect');
     }
-    
+
     /**
      * Render the step sequencer grid
      */
     renderGrid() {
         this.grid.innerHTML = '';
-        
+        this.grid.style.gridTemplateColumns = `repeat(${this.steps}, 28px)`;
+        this.grid.style.gridTemplateRows = `repeat(${this.tracks}, 28px)`;
+
         for (let track = 0; track < this.tracks; track++) {
             for (let step = 0; step < this.steps; step++) {
                 const button = document.createElement('button');
                 button.className = 'step-button';
                 button.dataset.track = track;
                 button.dataset.step = step;
-                button.setAttribute('aria-label', `Track ${track}, Step ${step}`);
+                button.setAttribute('aria-label', `${this.trackNames[track]}, Step ${step + 1}`);
                 this.grid.appendChild(button);
             }
         }
-        
+
         // Render step numbers
         const stepNumbers = document.getElementById('stepNumbers');
         stepNumbers.innerHTML = '';
+        stepNumbers.style.gridTemplateColumns = `repeat(${this.steps}, 28px)`;
+
         for (let step = 1; step <= this.steps; step++) {
             const number = document.createElement('div');
             number.className = 'step-number';
             number.textContent = step;
             stepNumbers.appendChild(number);
         }
+
+        // Render track labels
+        const trackLabels = document.getElementById('trackLabels');
+        trackLabels.innerHTML = '';
+        trackLabels.style.gridTemplateRows = `repeat(${this.tracks}, 28px)`;
+
+        this.trackNames.forEach((name, track) => {
+            const label = document.createElement('div');
+            label.className = 'track-label';
+            label.textContent = name;
+            label.dataset.track = track;
+            trackLabels.appendChild(label);
+        });
     }
-    
+
     /**
      * Bind event listeners
      */
@@ -216,18 +350,18 @@ class LoFiSequencer {
                 this.toggleStep(e.target);
             }
         });
-        
+
         // Play/Stop button
         this.playStopBtn.addEventListener('click', () => {
             this.togglePlay();
         });
-        
+
         // Tempo slider
         this.tempoSlider.addEventListener('input', (e) => {
             this.bpm = parseInt(e.target.value, 10);
             this.tempoValue.textContent = this.bpm;
         });
-        
+
         // Clear button
         this.clearBtn.addEventListener('click', () => {
             this.clearPattern();
@@ -238,6 +372,11 @@ class LoFiSequencer {
             this.loadPreset();
         });
 
+        // Steps selector
+        this.stepsSelect.addEventListener('change', (e) => {
+            this.changeSteps(parseInt(e.target.value, 10));
+        });
+
         // Keyboard shortcuts
         document.addEventListener('keydown', (e) => {
             if (e.code === 'Space') {
@@ -245,364 +384,6 @@ class LoFiSequencer {
                 this.togglePlay();
             }
         });
-    }
-    
-    /**
-     * Toggle a step on/off
-     * @param {HTMLElement} button - The button element
-     */
-    toggleStep(button) {
-        const track = parseInt(button.dataset.track, 10);
-        const step = parseInt(button.dataset.step, 10);
-        
-        this.pattern[track][step] = !this.pattern[track][step];
-        button.classList.toggle('active', this.pattern[track][step]);
-        
-        // Play sound immediately for feedback
-        if (this.pattern[track][step]) {
-            this.playTrack(track, this.audioContext.currentTime);
-        }
-        
-        const trackNames = ['Kick', 'Snare', 'Hi-Hat', 'Chord'];
-        this.updateStatus(`${trackNames[track]} at step ${step + 1} ${this.pattern[track][step] ? 'enabled' : 'disabled'}`);
-    }
-    
-    /**
-     * Toggle play/stop
-     */
-    togglePlay() {
-        if (this.isPlaying) {
-            this.stop();
-        } else {
-            this.play();
-        }
-    }
-    
-    /**
-     * Start the sequencer
-     */
-    play() {
-        // Initialize audio context on first play
-        if (!this.audioContext) {
-            this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        }
-        
-        // Resume audio context if suspended
-        if (this.audioContext.state === 'suspended') {
-            this.audioContext.resume();
-        }
-        
-        this.isPlaying = true;
-        this.currentStep = 0;
-        this.nextNoteTime = this.audioContext.currentTime;
-        
-        this.playStopBtn.innerHTML = '<span id="playIcon">■</span> Stop';
-        this.playStopBtn.classList.add('playing');
-        this.updateStatus('Playing...');
-        
-        // Start the scheduler
-        this.scheduler();
-    }
-    
-    /**
-     * Stop the sequencer
-     */
-    stop() {
-        this.isPlaying = false;
-        
-        if (this.timerID) {
-            clearTimeout(this.timerID);
-            this.timerID = null;
-        }
-        
-        this.playStopBtn.innerHTML = '<span id="playIcon">▶</span> Play';
-        this.playStopBtn.classList.remove('playing');
-        this.updateStatus('Stopped');
-        
-        // Clear current step indicator
-        this.clearCurrentStepIndicator();
-    }
-    
-    /**
-     * Scheduler - determines when to play notes
-     */
-    scheduler() {
-        // While there are notes that will need to play before the next interval,
-        // schedule them and advance the pointer
-        while (this.nextNoteTime < this.audioContext.currentTime + this.scheduleAheadTime) {
-            this.scheduleNote(this.currentStep, this.nextNoteTime);
-            this.advanceNote();
-        }
-        
-        if (this.isPlaying) {
-            this.timerID = setTimeout(() => this.scheduler(), this.lookahead);
-        }
-    }
-    
-    /**
-     * Advance to the next note
-     */
-    advanceNote() {
-        const secondsPerBeat = 60.0 / this.bpm;
-        this.nextNoteTime += 0.25 * secondsPerBeat; // 16th notes
-        this.currentStep = (this.currentStep + 1) % this.steps;
-    }
-    
-    /**
-     * Schedule a note to play
-     * @param {number} stepNumber - The step number
-     * @param {number} time - The time to play the note
-     */
-    scheduleNote(stepNumber, time) {
-        // Push visual update to the queue
-        setTimeout(() => {
-            this.updateVisuals(stepNumber);
-        }, (time - this.audioContext.currentTime) * 1000);
-        
-        // Play tracks that have notes at this step
-        for (let track = 0; track < this.tracks; track++) {
-            if (this.pattern[track][stepNumber]) {
-                this.playTrack(track, time);
-            }
-        }
-    }
-    
-    /**
-     * Update visual indicators
-     * @param {number} stepNumber - The current step number
-     */
-    updateVisuals(stepNumber) {
-        // Clear previous current step indicator
-        this.clearCurrentStepIndicator();
-        
-        // Set new current step indicator
-        const buttons = this.grid.querySelectorAll('.step-button');
-        buttons.forEach((button, index) => {
-            const step = parseInt(button.dataset.step, 10);
-            if (step === stepNumber) {
-                button.classList.add('current');
-                
-                // Add trigger animation if active
-                if (button.classList.contains('active')) {
-                    button.classList.add('triggered');
-                    setTimeout(() => button.classList.remove('triggered'), 100);
-                }
-            }
-        });
-    }
-    
-    /**
-     * Clear current step indicator
-     */
-    clearCurrentStepIndicator() {
-        const buttons = this.grid.querySelectorAll('.step-button');
-        buttons.forEach(button => {
-            button.classList.remove('current');
-        });
-    }
-    
-    /**
-     * Play a track
-     * @param {number} track - The track number (0-3)
-     * @param {number} time - The time to play
-     */
-    playTrack(track, time) {
-        switch (track) {
-            case 0:
-                this.playKick(time);
-                break;
-            case 1:
-                this.playSnare(time);
-                break;
-            case 2:
-                this.playHiHat(time);
-                break;
-            case 3:
-                this.playChord(time);
-                break;
-        }
-    }
-    
-    /**
-     * Generate a deep, soft kick drum
-     * @param {number} time - The time to play
-     */
-    playKick(time) {
-        const osc = this.audioContext.createOscillator();
-        const gain = this.audioContext.createGain();
-        const filter = this.audioContext.createBiquadFilter();
-        
-        // Lowpass filter for warmth
-        filter.type = 'lowpass';
-        filter.frequency.setValueAtTime(200, time);
-        filter.frequency.exponentialRampToValueAtTime(50, time + 0.1);
-        
-        // Oscillator for the kick
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(150, time);
-        osc.frequency.exponentialRampToValueAtTime(40, time + 0.1);
-        
-        // Envelope
-        gain.gain.setValueAtTime(0.8, time);
-        gain.gain.exponentialRampToValueAtTime(0.01, time + 0.3);
-        
-        // Connect nodes
-        osc.connect(filter);
-        filter.connect(gain);
-        gain.connect(this.audioContext.destination);
-        
-        // Start and stop
-        osc.start(time);
-        osc.stop(time + 0.3);
-    }
-    
-    /**
-     * Generate a crisp snare hit
-     * @param {number} time - The time to play
-     */
-    playSnare(time) {
-        // Noise component
-        const noise = this.audioContext.createBufferSource();
-        const noiseBuffer = this.createNoiseBuffer();
-        noise.buffer = noiseBuffer;
-        
-        const noiseFilter = this.audioContext.createBiquadFilter();
-        noiseFilter.type = 'highpass';
-        noiseFilter.frequency.setValueAtTime(1000, time);
-        
-        const noiseGain = this.audioContext.createGain();
-        noiseGain.gain.setValueAtTime(0.3, time);
-        noiseGain.gain.exponentialRampToValueAtTime(0.01, time + 0.2);
-        
-        noise.connect(noiseFilter);
-        noiseFilter.connect(noiseGain);
-        noiseGain.connect(this.audioContext.destination);
-        
-        // Tone component
-        const osc = this.audioContext.createOscillator();
-        const oscGain = this.audioContext.createGain();
-        
-        osc.type = 'triangle';
-        osc.frequency.setValueAtTime(200, time);
-        osc.frequency.exponentialRampToValueAtTime(150, time + 0.1);
-        
-        oscGain.gain.setValueAtTime(0.4, time);
-        oscGain.gain.exponentialRampToValueAtTime(0.01, time + 0.15);
-        
-        osc.connect(oscGain);
-        oscGain.connect(this.audioContext.destination);
-        
-        // Start and stop
-        noise.start(time);
-        noise.stop(time + 0.2);
-        osc.start(time);
-        osc.stop(time + 0.15);
-    }
-    
-    /**
-     * Generate a tight closed hi-hat
-     * @param {number} time - The time to play
-     */
-    playHiHat(time) {
-        const noise = this.audioContext.createBufferSource();
-        const noiseBuffer = this.createNoiseBuffer(0.05); // Shorter buffer for hi-hat
-        noise.buffer = noiseBuffer;
-        
-        const filter = this.audioContext.createBiquadFilter();
-        filter.type = 'highpass';
-        filter.frequency.setValueAtTime(7000, time);
-        filter.frequency.exponentialRampToValueAtTime(5000, time + 0.05);
-        
-        const gain = this.audioContext.createGain();
-        gain.gain.setValueAtTime(0.15, time);
-        gain.gain.exponentialRampToValueAtTime(0.01, time + 0.08);
-        
-        noise.connect(filter);
-        filter.connect(gain);
-        gain.connect(this.audioContext.destination);
-        
-        noise.start(time);
-        noise.stop(time + 0.1);
-    }
-    
-    /**
-     * Generate a warm, jazzy chord (lo-fi piano/Rhodes style)
-     * @param {number} time - The time to play
-     */
-    playChord(time) {
-        // C minor 7 chord with lo-fi character
-        const chordFrequencies = [130.81, 155.56, 196.00, 233.08]; // C3, Eb3, G3, Bb3
-        
-        chordFrequencies.forEach((freq, i) => {
-            const osc = this.audioContext.createOscillator();
-            const gain = this.audioContext.createGain();
-            const filter = this.audioContext.createBiquadFilter();
-            
-            // Use triangle waves for warmth
-            osc.type = 'triangle';
-            osc.frequency.setValueAtTime(freq + (Math.random() - 0.5) * 2, time); // Slight detune for lo-fi feel
-            
-            // Lowpass filter for mellow tone
-            filter.type = 'lowpass';
-            filter.frequency.setValueAtTime(800 + (Math.random() * 200), time);
-            filter.Q.setValueAtTime(1, time);
-            
-            // ADSR envelope with slow attack for soft feel
-            gain.gain.setValueAtTime(0, time);
-            gain.gain.linearRampToValueAtTime(0.1 - (i * 0.015), time + 0.05); // Attack
-            gain.gain.exponentialRampToValueAtTime(0.08 - (i * 0.012), time + 0.3); // Decay
-            gain.gain.exponentialRampToValueAtTime(0.01, time + 1.2); // Release
-            
-            osc.connect(filter);
-            filter.connect(gain);
-            gain.connect(this.audioContext.destination);
-            
-            osc.start(time);
-            osc.stop(time + 1.3);
-        });
-    }
-    
-    /**
-     * Create a noise buffer for snare and hi-hat
-     * @param {number} duration - Duration in seconds
-     * @returns {AudioBuffer} Noise buffer
-     */
-    createNoiseBuffer(duration = 0.5) {
-        const bufferSize = this.audioContext.sampleRate * duration;
-        const buffer = this.audioContext.createBuffer(1, bufferSize, this.audioContext.sampleRate);
-        const data = buffer.getChannelData(0);
-        
-        for (let i = 0; i < bufferSize; i++) {
-            data[i] = Math.random() * 2 - 1;
-        }
-        
-        return buffer;
-    }
-    
-    /**
-     * Clear the entire pattern
-     */
-    clearPattern() {
-        // Clear pattern array
-        for (let track = 0; track < this.tracks; track++) {
-            this.pattern[track] = new Array(this.steps).fill(false);
-        }
-        
-        // Update visual buttons
-        const buttons = this.grid.querySelectorAll('.step-button');
-        buttons.forEach(button => {
-            button.classList.remove('active');
-        });
-        
-        this.updateStatus('Pattern cleared');
-    }
-    
-    /**
-     * Update the status text
-     * @param {string} text - Status message
-     */
-    updateStatus(text) {
-        this.statusText.textContent = text;
     }
 
     /**
@@ -621,6 +402,46 @@ class LoFiSequencer {
             option.textContent = presetName;
             this.presetSelect.appendChild(option);
         });
+    }
+
+    /**
+     * Populate steps dropdown
+     */
+    populateSteps() {
+        const stepsOptions = [16, 32, 64];
+        stepsOptions.forEach(steps => {
+            const option = document.createElement('option');
+            option.value = steps;
+            option.textContent = `${steps} steps`;
+            option.selected = steps === this.steps;
+            this.stepsSelect.appendChild(option);
+        });
+    }
+
+    /**
+     * Change the number of steps
+     * @param {number} newSteps - New number of steps
+     */
+    changeSteps(newSteps) {
+        // Preserve existing pattern data
+        const oldPattern = this.pattern.map(track => [...track]);
+
+        // Update steps
+        this.steps = newSteps;
+
+        // Reinitialize pattern array
+        for (let track = 0; track < this.tracks; track++) {
+            this.pattern[track] = new Array(this.steps).fill(false);
+            // Copy over old pattern data
+            for (let step = 0; step < Math.min(oldPattern[track].length, this.steps); step++) {
+                this.pattern[track][step] = oldPattern[track][step];
+            }
+        }
+
+        // Re-render grid
+        this.renderGrid();
+
+        this.updateStatus(`Pattern length: ${this.steps} steps`);
     }
 
     /**
@@ -651,31 +472,450 @@ class LoFiSequencer {
 
         this.updateStatus(`Loaded preset: ${selectedPreset} (${preset.bpm} BPM)`);
     }
-    
+
     /**
-     * Get the current pattern (useful for saving/loading)
+     * Toggle a step on/off
+     * @param {HTMLElement} button - The button element
+     */
+    toggleStep(button) {
+        const track = parseInt(button.dataset.track, 10);
+        const step = parseInt(button.dataset.step, 10);
+
+        this.pattern[track][step] = !this.pattern[track][step];
+        button.classList.toggle('active', this.pattern[track][step]);
+
+        // Play sound immediately for feedback
+        if (this.pattern[track][step]) {
+            this.playTrack(track, this.audioContext.currentTime);
+        }
+
+        this.updateStatus(`${this.trackNames[track]} at step ${step + 1} ${this.pattern[track][step] ? 'enabled' : 'disabled'}`);
+    }
+
+    /**
+     * Toggle play/stop
+     */
+    togglePlay() {
+        if (this.isPlaying) {
+            this.stop();
+        } else {
+            this.play();
+        }
+    }
+
+    /**
+     * Start the sequencer
+     */
+    play() {
+        // Initialize audio context on first play
+        if (!this.audioContext) {
+            this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        }
+
+        // Resume audio context if suspended
+        if (this.audioContext.state === 'suspended') {
+            this.audioContext.resume();
+        }
+
+        this.isPlaying = true;
+        this.currentStep = 0;
+        this.nextNoteTime = this.audioContext.currentTime;
+
+        this.playStopBtn.innerHTML = '<span id="playIcon">■</span> Stop';
+        this.playStopBtn.classList.add('playing');
+        this.updateStatus('Playing...');
+
+        // Start the scheduler
+        this.scheduler();
+    }
+
+    /**
+     * Stop the sequencer
+     */
+    stop() {
+        this.isPlaying = false;
+
+        if (this.timerID) {
+            clearTimeout(this.timerID);
+            this.timerID = null;
+        }
+
+        this.playStopBtn.innerHTML = '<span id="playIcon">▶</span> Play';
+        this.playStopBtn.classList.remove('playing');
+        this.updateStatus('Stopped');
+
+        // Clear current step indicator
+        this.clearCurrentStepIndicator();
+    }
+
+    /**
+     * Scheduler - determines when to play notes
+     */
+    scheduler() {
+        // While there are notes that will need to play before the next interval,
+        // schedule them and advance the pointer
+        while (this.nextNoteTime < this.audioContext.currentTime + this.scheduleAheadTime) {
+            this.scheduleNote(this.currentStep, this.nextNoteTime);
+            this.advanceNote();
+        }
+
+        if (this.isPlaying) {
+            this.timerID = setTimeout(() => this.scheduler(), this.lookahead);
+        }
+    }
+
+    /**
+     * Advance to the next note
+     */
+    advanceNote() {
+        const secondsPerBeat = 60.0 / this.bpm;
+        this.nextNoteTime += 0.25 * secondsPerBeat; // 16th notes
+        this.currentStep = (this.currentStep + 1) % this.steps;
+    }
+
+    /**
+     * Schedule a note to play
+     * @param {number} stepNumber - The step number
+     * @param {number} time - The time to play the note
+     */
+    scheduleNote(stepNumber, time) {
+        // Push visual update to the queue
+        setTimeout(() => {
+            this.updateVisuals(stepNumber);
+        }, (time - this.audioContext.currentTime) * 1000);
+
+        // Play tracks that have notes at this step
+        for (let track = 0; track < this.tracks; track++) {
+            if (this.pattern[track][stepNumber]) {
+                this.playTrack(track, time);
+            }
+        }
+    }
+
+    /**
+     * Update visual indicators
+     * @param {number} stepNumber - The current step number
+     */
+    updateVisuals(stepNumber) {
+        // Clear previous current step indicator
+        this.clearCurrentStepIndicator();
+
+        // Set new current step indicator
+        const buttons = this.grid.querySelectorAll('.step-button');
+        buttons.forEach((button, index) => {
+            const step = parseInt(button.dataset.step, 10);
+            if (step === stepNumber) {
+                button.classList.add('current');
+
+                // Add trigger animation if active
+                if (button.classList.contains('active')) {
+                    button.classList.add('triggered');
+                    setTimeout(() => button.classList.remove('triggered'), 100);
+                }
+            }
+        });
+    }
+
+    /**
+     * Clear current step indicator
+     */
+    clearCurrentStepIndicator() {
+        const buttons = this.grid.querySelectorAll('.step-button');
+        buttons.forEach(button => {
+            button.classList.remove('current');
+        });
+    }
+
+    /**
+     * Play a track
+     * @param {number} track - The track number (0-5)
+     * @param {number} time - The time to play
+     */
+    playTrack(track, time) {
+        switch (track) {
+            case 0:
+                this.playKick(time);
+                break;
+            case 1:
+                this.playSnare(time);
+                break;
+            case 2:
+                this.playHiHat(time);
+                break;
+            case 3:
+                this.playChord(time);
+                break;
+            case 4:
+                this.playBass(time);
+                break;
+            case 5:
+                this.playFX(time);
+                break;
+        }
+    }
+
+    /**
+     * Generate a deep, soft kick drum
+     * @param {number} time - The time to play
+     */
+    playKick(time) {
+        const osc = this.audioContext.createOscillator();
+        const gain = this.audioContext.createGain();
+        const filter = this.audioContext.createBiquadFilter();
+
+        // Lowpass filter for warmth
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(200, time);
+        filter.frequency.exponentialRampToValueAtTime(50, time + 0.1);
+
+        // Oscillator for the kick
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(150, time);
+        osc.frequency.exponentialRampToValueAtTime(40, time + 0.1);
+
+        // Envelope
+        gain.gain.setValueAtTime(0.8, time);
+        gain.gain.exponentialRampToValueAtTime(0.01, time + 0.3);
+
+        // Connect nodes
+        osc.connect(filter);
+        filter.connect(gain);
+        gain.connect(this.audioContext.destination);
+
+        // Start and stop
+        osc.start(time);
+        osc.stop(time + 0.3);
+    }
+
+    /**
+     * Generate a crisp snare hit
+     * @param {number} time - The time to play
+     */
+    playSnare(time) {
+        // Noise component
+        const noise = this.audioContext.createBufferSource();
+        const noiseBuffer = this.createNoiseBuffer();
+        noise.buffer = noiseBuffer;
+
+        const noiseFilter = this.audioContext.createBiquadFilter();
+        noiseFilter.type = 'highpass';
+        noiseFilter.frequency.setValueAtTime(1000, time);
+
+        const noiseGain = this.audioContext.createGain();
+        noiseGain.gain.setValueAtTime(0.3, time);
+        noiseGain.gain.exponentialRampToValueAtTime(0.01, time + 0.2);
+
+        noise.connect(noiseFilter);
+        noiseFilter.connect(noiseGain);
+        noiseGain.connect(this.audioContext.destination);
+
+        // Tone component
+        const osc = this.audioContext.createOscillator();
+        const oscGain = this.audioContext.createGain();
+
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(200, time);
+        osc.frequency.exponentialRampToValueAtTime(150, time + 0.1);
+
+        oscGain.gain.setValueAtTime(0.4, time);
+        oscGain.gain.exponentialRampToValueAtTime(0.01, time + 0.15);
+
+        osc.connect(oscGain);
+        oscGain.connect(this.audioContext.destination);
+
+        // Start and stop
+        noise.start(time);
+        noise.stop(time + 0.2);
+        osc.start(time);
+        osc.stop(time + 0.15);
+    }
+
+    /**
+     * Generate a tight closed hi-hat
+     * @param {number} time - The time to play
+     */
+    playHiHat(time) {
+        const noise = this.audioContext.createBufferSource();
+        const noiseBuffer = this.createNoiseBuffer(0.05);
+        noise.buffer = noiseBuffer;
+
+        const filter = this.audioContext.createBiquadFilter();
+        filter.type = 'highpass';
+        filter.frequency.setValueAtTime(7000, time);
+        filter.frequency.exponentialRampToValueAtTime(5000, time + 0.05);
+
+        const gain = this.audioContext.createGain();
+        gain.gain.setValueAtTime(0.15, time);
+        gain.gain.exponentialRampToValueAtTime(0.01, time + 0.08);
+
+        noise.connect(filter);
+        filter.connect(gain);
+        gain.connect(this.audioContext.destination);
+
+        noise.start(time);
+        noise.stop(time + 0.1);
+    }
+
+    /**
+     * Generate a warm, jazzy chord
+     * @param {number} time - The time to play
+     */
+    playChord(time) {
+        // C minor 7 chord with lo-fi character
+        const chordFrequencies = [130.81, 155.56, 196.00, 233.08];
+
+        chordFrequencies.forEach((freq, i) => {
+            const osc = this.audioContext.createOscillator();
+            const gain = this.audioContext.createGain();
+            const filter = this.audioContext.createBiquadFilter();
+
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(freq + (Math.random() - 0.5) * 2, time);
+
+            filter.type = 'lowpass';
+            filter.frequency.setValueAtTime(800 + (Math.random() * 200), time);
+            filter.Q.setValueAtTime(1, time);
+
+            gain.gain.setValueAtTime(0, time);
+            gain.gain.linearRampToValueAtTime(0.1 - (i * 0.015), time + 0.05);
+            gain.gain.exponentialRampToValueAtTime(0.08 - (i * 0.012), time + 0.3);
+            gain.gain.exponentialRampToValueAtTime(0.01, time + 1.2);
+
+            osc.connect(filter);
+            filter.connect(gain);
+            gain.connect(this.audioContext.destination);
+
+            osc.start(time);
+            osc.stop(time + 1.3);
+        });
+    }
+
+    /**
+     * Generate deep bass (808 style)
+     * @param {number} time - The time to play
+     */
+    playBass(time) {
+        const osc = this.audioContext.createOscillator();
+        const gain = this.audioContext.createGain();
+
+        // Sine wave for sub bass
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(65.41, time); // C2
+        osc.frequency.exponentialRampToValueAtTime(32.70, time + 0.15);
+
+        // Envelope for punch
+        gain.gain.setValueAtTime(0, time);
+        gain.gain.linearRampToValueAtTime(0.6, time + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.4, time + 0.15);
+        gain.gain.exponentialRampToValueAtTime(0.01, time + 0.8);
+
+        osc.connect(gain);
+        gain.connect(this.audioContext.destination);
+
+        osc.start(time);
+        osc.stop(time + 0.9);
+    }
+
+    /**
+     * Generate FX sounds (whooshes, impacts, etc.)
+     * @param {number} time - The time to play
+     */
+    playFX(time) {
+        const osc = this.audioContext.createOscillator();
+        const gain = this.audioContext.createGain();
+        const filter = this.audioContext.createBiquadFilter();
+
+        // White noise buffer
+        const noise = this.audioContext.createBufferSource();
+        const noiseBuffer = this.createNoiseBuffer(0.3);
+        noise.buffer = noiseBuffer;
+
+        // Bandpass filter for sweep
+        filter.type = 'bandpass';
+        filter.frequency.setValueAtTime(200, time);
+        filter.frequency.exponentialRampToValueAtTime(2000, time + 0.15);
+        filter.frequency.exponentialRampToValueAtTime(400, time + 0.3);
+        filter.Q.setValueAtTime(10, time);
+
+        gain.gain.setValueAtTime(0, time);
+        gain.gain.linearRampToValueAtTime(0.25, time + 0.1);
+        gain.gain.exponentialRampToValueAtTime(0.01, time + 0.35);
+
+        noise.connect(filter);
+        filter.connect(gain);
+        gain.connect(this.audioContext.destination);
+
+        noise.start(time);
+        noise.stop(time + 0.4);
+    }
+
+    /**
+     * Create a noise buffer for snare and hi-hat
+     * @param {number} duration - Duration in seconds
+     * @returns {AudioBuffer} Noise buffer
+     */
+    createNoiseBuffer(duration = 0.5) {
+        const bufferSize = this.audioContext.sampleRate * duration;
+        const buffer = this.audioContext.createBuffer(1, bufferSize, this.audioContext.sampleRate);
+        const data = buffer.getChannelData(0);
+
+        for (let i = 0; i < bufferSize; i++) {
+            data[i] = Math.random() * 2 - 1;
+        }
+
+        return buffer;
+    }
+
+    /**
+     * Clear the entire pattern
+     */
+    clearPattern() {
+        // Clear pattern array
+        for (let track = 0; track < this.tracks; track++) {
+            this.pattern[track] = new Array(this.steps).fill(false);
+        }
+
+        // Update visual buttons
+        const buttons = this.grid.querySelectorAll('.step-button');
+        buttons.forEach(button => {
+            button.classList.remove('active');
+        });
+
+        this.updateStatus('Pattern cleared');
+    }
+
+    /**
+     * Update the status text
+     * @param {string} text - Status message
+     */
+    updateStatus(text) {
+        this.statusText.textContent = text;
+    }
+
+    /**
+     * Get the current pattern
      * @returns {Array} The current pattern
      */
     getPattern() {
         return this.pattern.map(track => [...track]);
     }
-    
+
     /**
-     * Set the pattern (useful for saving/loading)
+     * Set the pattern
      * @param {Array} pattern - The pattern to set
      */
     setPattern(pattern) {
         if (pattern.length !== this.tracks) {
-            throw new Error('Pattern must have exactly 4 tracks');
+            throw new Error('Pattern must have exactly 6 tracks');
         }
-        
+
         for (let track = 0; track < this.tracks; track++) {
             if (pattern[track].length !== this.steps) {
-                throw new Error('Each track must have exactly 16 steps');
+                throw new Error(`Each track must have exactly ${this.steps} steps`);
             }
             this.pattern[track] = [...pattern[track]];
         }
-        
+
         // Update visual buttons
         const buttons = this.grid.querySelectorAll('.step-button');
         buttons.forEach(button => {
@@ -683,7 +923,7 @@ class LoFiSequencer {
             const step = parseInt(button.dataset.step, 10);
             button.classList.toggle('active', this.pattern[track][step]);
         });
-        
+
         this.updateStatus('Pattern loaded');
     }
 }
@@ -691,10 +931,10 @@ class LoFiSequencer {
 // Initialize the sequencer when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
     window.sequencer = new LoFiSequencer({
-        steps: 16,
-        tracks: 4,
+        steps: 32,
+        tracks: 6,
         bpm: 85
     });
-    
+
     console.log('Lo-Fi Sequencer 95 initialized successfully!');
 });

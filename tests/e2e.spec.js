@@ -1,6 +1,6 @@
 const { test, expect } = require('@playwright/test');
 
-test.describe('Lo-Fi Sequencer 95 E2E Tests', () => {
+test.describe('Lo-Fi Sequencer 95 E2E Tests (Expanded)', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
   });
@@ -65,8 +65,6 @@ test.describe('Lo-Fi Sequencer 95 E2E Tests', () => {
 
     // Click multiple step buttons to activate them
     const stepButtons = grid.locator('.step-button');
-    const firstThree = stepButtons.nth(0).or(stepButtons.nth(1)).or(stepButtons.nth(2));
-
     await stepButtons.nth(0).click();
     await stepButtons.nth(1).click();
     await stepButtons.nth(2).click();
@@ -85,7 +83,7 @@ test.describe('Lo-Fi Sequencer 95 E2E Tests', () => {
     await expect(stepButtons.nth(2)).not.toHaveClass(/active/);
   });
 
-  test('Preset dropdown should load a preset', async ({ page }) => {
+  test('Preset dropdown should load artist presets', async ({ page }) => {
     const presetSelect = page.locator('#presetSelect');
     const loadPresetBtn = page.locator('#loadPresetBtn');
     const grid = page.locator('#sequencerGrid');
@@ -97,28 +95,107 @@ test.describe('Lo-Fi Sequencer 95 E2E Tests', () => {
 
     // Verify preset options are available
     const options = presetSelect.locator('option');
-    await expect(options).toHaveCount(9); // 8 presets + "Select preset..."
+    await expect(options).toHaveCount(11); // 10 artist presets + "Select artist preset..."
 
-    // Select "Classic Lo-Fi" preset
-    await presetSelect.selectOption('Classic Lo-Fi');
+    // Select "The Weeknd (Blinding Lights)" preset
+    await presetSelect.selectOption('The Weeknd (Blinding Lights)');
 
     // Click Load button
     await loadPresetBtn.click();
 
-    // Verify BPM is updated to 85
-    await expect(tempoSlider).toHaveValue('85');
-    await expect(tempoValue).toHaveText('85');
+    // Verify BPM is updated to 171
+    await expect(tempoSlider).toHaveValue('171');
+    await expect(tempoValue).toHaveText('171');
 
-    // Verify some steps are activated (Classic Lo-Fi should have kick on beat 1)
+    // Verify some steps are activated
     const stepButtons = grid.locator('.step-button');
     await expect(stepButtons.nth(0)).toHaveClass(/active/); // First kick
+  });
 
-    // Load a different preset with different BPM
-    await presetSelect.selectOption('Trap');
-    await loadPresetBtn.click();
+  test('Grid should have 6 tracks and 32 steps by default', async ({ page }) => {
+    const grid = page.locator('#sequencerGrid');
+    const trackLabels = page.locator('#trackLabels');
+    const stepNumbers = page.locator('#stepNumbers');
 
-    // Verify BPM is updated to 140
-    await expect(tempoSlider).toHaveValue('140');
-    await expect(tempoValue).toHaveText('140');
+    // Wait for grid to be generated
+    await grid.waitFor({ state: 'attached' });
+
+    // Check number of track labels
+    const labels = trackLabels.locator('.track-label');
+    await expect(labels).toHaveCount(6);
+
+    // Check track names
+    await expect(labels.nth(0)).toHaveText('Kick');
+    await expect(labels.nth(1)).toHaveText('Snare');
+    await expect(labels.nth(2)).toHaveText('Hi-Hat');
+    await expect(labels.nth(3)).toHaveText('Chord');
+    await expect(labels.nth(4)).toHaveText('Bass');
+    await expect(labels.nth(5)).toHaveText('FX');
+
+    // Check number of step buttons (6 tracks × 32 steps = 192 buttons)
+    const stepButtons = grid.locator('.step-button');
+    await expect(stepButtons).toHaveCount(192);
+
+    // Check number of step numbers
+    const numbers = stepNumbers.locator('.step-number');
+    await expect(numbers).toHaveCount(32);
+  });
+
+  test('Steps selector should change pattern length', async ({ page }) => {
+    const stepsSelect = page.locator('#stepsSelect');
+    const grid = page.locator('#sequencerGrid');
+
+    // Wait for grid to be generated
+    await grid.waitFor({ state: 'attached' });
+
+    // Default is 32 steps
+    let stepButtons = grid.locator('.step-button');
+    await expect(stepButtons).toHaveCount(192); // 6 tracks × 32 steps
+
+    // Change to 16 steps
+    await stepsSelect.selectOption('16');
+    await page.waitForTimeout(100); // Wait for re-render
+
+    stepButtons = grid.locator('.step-button');
+    await expect(stepButtons).toHaveCount(96); // 6 tracks × 16 steps
+
+    // Change to 64 steps
+    await stepsSelect.selectOption('64');
+    await page.waitForTimeout(100); // Wait for re-render
+
+    stepButtons = grid.locator('.step-button');
+    await expect(stepButtons).toHaveCount(384); // 6 tracks × 64 steps
+  });
+
+  test('Multiple artist presets should work correctly', async ({ page }) => {
+    const presetSelect = page.locator('#presetSelect');
+    const loadPresetBtn = page.locator('#loadPresetBtn');
+    const tempoSlider = page.locator('#tempoSlider');
+    const tempoValue = page.locator('#tempoValue');
+    const grid = page.locator('#sequencerGrid');
+
+    // Wait for grid to be generated
+    await grid.waitFor({ state: 'attached' });
+
+    // Test different artists with different tempos
+    const presets = [
+      { name: 'Kendrick Lamar (HUMBLE.)', bpm: 150 },
+      { name: 'Drake (Hotline Bling)', bpm: 135 },
+      { name: 'Tupac (California Love)', bpm: 92 },
+      { name: 'J. Cole (No Role Modelz)', bpm: 80 }
+    ];
+
+    for (const preset of presets) {
+      await presetSelect.selectOption(preset.name);
+      await loadPresetBtn.click();
+
+      await expect(tempoSlider).toHaveValue(String(preset.bpm));
+      await expect(tempoValue).toHaveText(String(preset.bpm));
+
+      // Verify at least one step is activated
+      const stepButtons = grid.locator('.step-button');
+      const firstActive = stepButtons.filter({ hasClass: 'active' }).first();
+      await expect(firstActive).toBeVisible();
+    }
   });
 });
