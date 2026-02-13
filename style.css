@@ -1,0 +1,434 @@
+/* ============================================
+   Lo-Fi Sequencer 95 - Windows 95 Style CSS
+   ============================================ */
+
+/* Rain GIF background - using a reliable rain animation */
+@import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+
+body {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: 'MS Sans Serif', 'Segoe UI', Tahoma, sans-serif;
+    font-size: 11px;
+    /* Rain on window effect using CSS gradients and animation */
+    background: linear-gradient(to bottom, #0a0a1a 0%, #1a1a2e 50%, #0a0a1a 100%);
+    overflow: hidden;
+    position: relative;
+}
+
+/* Animated rain effect */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: 
+        linear-gradient(180deg, rgba(255,255,255,0.02) 0%, transparent 50%),
+        linear-gradient(90deg, rgba(255,255,255,0.01) 0%, transparent 50%);
+    background-size: 2px 50px, 50px 2px;
+    animation: rain 1s linear infinite;
+    pointer-events: none;
+    opacity: 0.5;
+}
+
+@keyframes rain {
+    0% { background-position: 0 0, 0 0; }
+    100% { background-position: 2px 100px, 50px 0; }
+}
+
+/* Raindrops effect */
+body::after {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: 
+        radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px),
+        radial-gradient(circle, rgba(255,255,255,0.05) 1px, transparent 1px);
+    background-size: 100px 100px, 150px 150px;
+    background-position: 0 0, 50px 50px;
+    animation: raindrops 3s linear infinite;
+    pointer-events: none;
+}
+
+@keyframes raindrops {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(100px); }
+}
+
+/* Window 95 styling */
+.window {
+    background-color: #c0c0c0;
+    border: 2px solid;
+    border-color: #ffffff #808080 #808080 #ffffff;
+    box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.3);
+    max-width: 700px;
+    width: 95%;
+    position: relative;
+    z-index: 10;
+}
+
+/* Title bar */
+.title-bar {
+    background: linear-gradient(90deg, #000080 0%, #1084d0 100%);
+    color: white;
+    padding: 3px 5px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: bold;
+    letter-spacing: 0.5px;
+}
+
+.title-bar-text {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.title-bar-text::before {
+    content: '🎵';
+    font-size: 12px;
+}
+
+.title-bar-controls {
+    display: flex;
+    gap: 2px;
+}
+
+.control-button {
+    width: 16px;
+    height: 14px;
+    background-color: #c0c0c0;
+    border: 1px solid;
+    border-color: #ffffff #808080 #808080 #ffffff;
+    color: #000;
+    font-size: 10px;
+    line-height: 10px;
+    font-weight: bold;
+    cursor: pointer;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'MS Sans Serif', Arial, sans-serif;
+}
+
+.control-button:active {
+    border-color: #808080 #ffffff #ffffff #808080;
+    padding-top: 1px;
+    padding-left: 1px;
+}
+
+/* Window body */
+.window-body {
+    padding: 12px;
+    background-color: #c0c0c0;
+}
+
+/* Controls section */
+.controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 15px;
+    padding: 8px;
+    background-color: #c0c0c0;
+    border: 1px solid;
+    border-color: #808080 #ffffff #ffffff #808080;
+}
+
+/* Win95 button style */
+.win95-button {
+    background-color: #c0c0c0;
+    border: 2px solid;
+    border-color: #ffffff #808080 #808080 #ffffff;
+    color: #000;
+    font-family: 'MS Sans Serif', Tahoma, sans-serif;
+    font-size: 11px;
+    font-weight: normal;
+    padding: 4px 12px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    min-width: 75px;
+    justify-content: center;
+}
+
+.win95-button:active {
+    border-color: #808080 #ffffff #ffffff #808080;
+    padding: 5px 11px 3px 13px;
+}
+
+.win95-button.secondary {
+    background-color: #c0c0c0;
+}
+
+#playStopBtn.playing {
+    background-color: #ff0000;
+    color: white;
+    border-color: #808080 #ffffff #ffffff #808080;
+}
+
+/* Tempo control */
+.tempo-control {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+}
+
+.tempo-control label {
+    font-weight: normal;
+}
+
+.win95-slider {
+    width: 120px;
+    height: 18px;
+    -webkit-appearance: none;
+    appearance: none;
+    background: #c0c0c0;
+    border: 1px solid;
+    border-color: #808080 #ffffff #ffffff #808080;
+    cursor: pointer;
+}
+
+.win95-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 10px;
+    height: 20px;
+    background: #c0c0c0;
+    border: 2px solid;
+    border-color: #ffffff #808080 #808080 #ffffff;
+    cursor: pointer;
+}
+
+.win95-slider::-moz-range-thumb {
+    width: 10px;
+    height: 20px;
+    background: #c0c0c0;
+    border: 2px solid;
+    border-color: #ffffff #808080 #808080 #ffffff;
+    cursor: pointer;
+    cursor: pointer;
+}
+
+#tempoValue {
+    font-family: 'VT323', monospace;
+    font-size: 14px;
+    min-width: 30px;
+    text-align: right;
+}
+
+/* Track labels */
+.track-labels {
+    display: grid;
+    grid-template-rows: repeat(4, 1fr);
+    gap: 4px;
+    margin-bottom: 4px;
+    margin-right: 8px;
+}
+
+.track-label {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 8px;
+    font-size: 10px;
+    font-weight: normal;
+    color: #000;
+    height: 36px;
+    border: 1px solid #c0c0c0;
+}
+
+.track-label::before {
+    content: '';
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    margin-right: 6px;
+    border: 1px solid;
+    border-color: #808080 #ffffff #ffffff #808080;
+}
+
+/* Sequencer grid container */
+.sequencer-container {
+    display: flex;
+    align-items: flex-start;
+}
+
+.sequencer-grid {
+    display: grid;
+    grid-template-rows: repeat(4, 36px);
+    grid-template-columns: repeat(16, 36px);
+    gap: 4px;
+    background-color: #c0c0c0;
+    padding: 8px;
+    border: 1px solid;
+    border-color: #808080 #ffffff #ffffff #808080;
+}
+
+/* Step buttons */
+.step-button {
+    width: 36px;
+    height: 36px;
+    background-color: #c0c0c0;
+    border: 2px solid;
+    border-color: #ffffff #808080 #808080 #ffffff;
+    cursor: pointer;
+    transition: all 0.05s ease;
+    position: relative;
+}
+
+.step-button:active {
+    border-color: #808080 #ffffff #ffffff #808080;
+}
+
+/* Active step button - purple glow */
+.step-button.active {
+    background-color: #9932cc;
+    box-shadow: 
+        0 0 8px 2px rgba(153, 50, 204, 0.6),
+        inset 0 0 5px rgba(255, 255, 255, 0.3);
+    border-color: #da70d6 #8b008b #8b008b #da70d6;
+}
+
+.step-button.active:hover {
+    box-shadow: 
+        0 0 12px 4px rgba(153, 50, 204, 0.8),
+        inset 0 0 5px rgba(255, 255, 255, 0.4);
+    background-color: #ba55d3;
+}
+
+/* Current playing step indicator */
+.step-button.current {
+    border-color: #ffff00 #808000 #808000 #ffff00;
+    box-shadow: 
+        0 0 4px 1px rgba(255, 255, 0, 0.5),
+        inset 0 0 3px rgba(255, 255, 0, 0.3);
+}
+
+.step-button.active.current {
+    background-color: #da70d6;
+    box-shadow: 
+        0 0 15px 5px rgba(153, 50, 204, 0.9),
+        0 0 8px 2px rgba(255, 255, 0, 0.6),
+        inset 0 0 5px rgba(255, 255, 255, 0.4);
+    border-color: #fff #da70d6 #da70d6 #fff;
+}
+
+/* Step numbers */
+.step-numbers {
+    display: grid;
+    grid-template-columns: repeat(16, 36px);
+    gap: 4px;
+    margin-top: 4px;
+    margin-left: 60px;
+}
+
+.step-number {
+    text-align: center;
+    font-size: 9px;
+    font-family: 'VT323', monospace;
+    color: #000;
+}
+
+/* Beat markers - every 4th step highlighted */
+.step-number:nth-child(4n) {
+    color: #800080;
+    font-weight: bold;
+}
+
+/* Status bar */
+.status-bar {
+    margin-top: 15px;
+    padding: 4px 8px;
+    background-color: #c0c0c0;
+    border: 1px solid;
+    border-color: #808080 #ffffff #ffffff #808080;
+    font-size: 10px;
+    color: #000;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.status-bar::before {
+    content: '●';
+    color: #008000;
+    font-size: 8px;
+}
+
+/* Responsive design */
+@media (max-width: 600px) {
+    .sequencer-grid {
+        grid-template-columns: repeat(8, 32px);
+        grid-template-rows: repeat(8, 32px);
+        gap: 3px;
+        padding: 6px;
+    }
+    
+    .step-button {
+        width: 32px;
+        height: 32px;
+    }
+    
+    .track-labels {
+        display: none;
+    }
+    
+    .step-numbers {
+        grid-template-columns: repeat(8, 32px);
+        margin-left: 0;
+    }
+    
+    .controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .tempo-control {
+        justify-content: center;
+    }
+    
+    .win95-slider {
+        width: 100%;
+    }
+}
+
+/* Disabled state for mobile touch feedback */
+.step-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Animation for step trigger */
+@keyframes stepTrigger {
+    0% {
+        transform: scale(1);
+        filter: brightness(1);
+    }
+    50% {
+        transform: scale(1.1);
+        filter: brightness(1.3);
+    }
+    100% {
+        transform: scale(1);
+        filter: brightness(1);
+    }
+}
+
+.step-button.triggered {
+    animation: stepTrigger 0.1s ease-out;
+}

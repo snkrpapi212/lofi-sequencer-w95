@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lo-Fi Sequencer 95 - Tests</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            background-color: #1a1a2e;
+            color: #eee;
+            padding: 20px;
+            margin: 0;
+        }
+        
+        h1 {
+            color: #9932cc;
+            border-bottom: 2px solid #9932cc;
+            padding-bottom: 10px;
+        }
+        
+        #output {
+            background-color: #0a0a1a;
+            border: 1px solid #333;
+            padding: 20px;
+            border-radius: 5px;
+            margin-top: 20px;
+            font-size: 14px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+        }
+        
+        .success {
+            color: #00ff00;
+        }
+        
+        .error {
+            color: #ff4444;
+        }
+        
+        .info {
+            color: #4488ff;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Lo-Fi Sequencer 95 - Unit Tests</h1>
+    
+    <p>Running unit tests for the LoFiSequencer class...</p>
+    
+    <div id="output"></div>
+    
+    <script src="../app.js"></script>
+    <script src="sequencer.test.js"></script>
+    <script>
+        // Override console.log to output to the page
+        const output = document.getElementById('output');
+        const originalLog = console.log;
+        const originalError = console.error;
+        const originalWarn = console.warn;
+        
+        console.log = function(...args) {
+            const message = args.map(arg => 
+                typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)
+            ).join(' ');
+            
+            output.innerHTML += `<div class="info">${escapeHtml(message)}</div>`;
+            originalLog.apply(console, args);
+        };
+        
+        console.error = function(...args) {
+            const message = args.map(arg => 
+                typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)
+            ).join(' ');
+            
+            output.innerHTML += `<div class="error">${escapeHtml(message)}</div>`;
+            originalError.apply(console, args);
+        };
+        
+        console.warn = function(...args) {
+            const message = args.map(arg => 
+                typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)
+            ).join(' ');
+            
+            output.innerHTML += `<div class="info">${escapeHtml(message)}</div>`;
+            originalWarn.apply(console, args);
+        };
+        
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        // Add success/error styling to output
+        const observer = new MutationObserver(() => {
+            const lines = output.querySelectorAll('div');
+            lines.forEach(line => {
+                if (line.textContent.includes('✅')) {
+                    line.classList.add('success');
+                } else if (line.textContent.includes('❌')) {
+                    line.classList.add('error');
+                } else if (line.textContent.includes('🎉')) {
+                    line.classList.add('success');
+                } else if (line.textContent.includes('⚠️')) {
+                    line.classList.add('error');
+                }
+            });
+        });
+        
+        observer.observe(output, { childList: true });
+    </script>
+</body>
+</html>
