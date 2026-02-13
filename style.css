@@ -192,6 +192,35 @@ body::after {
     font-weight: normal;
 }
 
+/* Preset control */
+.preset-control {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+}
+
+.preset-control label {
+    font-weight: normal;
+}
+
+.win95-select {
+    background-color: #ffffff;
+    border: 2px solid;
+    border-color: #808080 #ffffff #ffffff #808080;
+    color: #000;
+    font-family: 'MS Sans Serif', Tahoma, sans-serif;
+    font-size: 11px;
+    padding: 2px 4px;
+    cursor: pointer;
+    min-width: 150px;
+}
+
+.win95-select:focus {
+    outline: 1px dotted #000;
+    outline-offset: -2px;
+}
+
 .win95-slider {
     width: 120px;
     height: 18px;

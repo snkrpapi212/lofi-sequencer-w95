@@ -19,19 +19,19 @@ class LoFiSequencer {
         this.isPlaying = false;
         this.currentStep = 0;
         this.pattern = [];
-        
+
         // Initialize pattern grid
         for (let track = 0; track < this.tracks; track++) {
             this.pattern[track] = new Array(this.steps).fill(false);
         }
-        
+
         // Audio context
         this.audioContext = null;
         this.nextNoteTime = 0;
         this.timerID = null;
         this.lookahead = 25.0; // milliseconds
         this.scheduleAheadTime = 0.1; // seconds
-        
+
         // DOM elements
         this.grid = null;
         this.playStopBtn = null;
@@ -39,7 +39,117 @@ class LoFiSequencer {
         this.tempoValue = null;
         this.clearBtn = null;
         this.statusText = null;
-        
+        this.presetSelect = null;
+        this.loadPresetBtn = null;
+
+        // Define presets
+        this.presets = {
+            'Classic Lo-Fi': {
+                bpm: 85,
+                pattern: [
+                    // Kick - classic lo-fi beat
+                    [true, false, false, false, true, false, false, false, true, false, false, false, true, false, false, false],
+                    // Snare - on beats 2 and 4
+                    [false, false, true, false, false, false, true, false, false, false, true, false, false, false, true, false],
+                    // Hi-Hat - 8th notes
+                    [true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false],
+                    // Chord - occasional stabs
+                    [false, false, false, false, true, false, false, false, false, false, false, false, true, false, false, false]
+                ]
+            },
+            'Boom Bap': {
+                bpm: 90,
+                pattern: [
+                    // Kick - heavy boom bap pattern
+                    [true, false, false, true, false, false, true, false, true, false, false, true, false, false, true, false],
+                    // Snare - classic 2 and 4 with some syncopation
+                    [false, false, true, false, false, false, true, false, false, false, true, false, false, false, true, false],
+                    // Hi-Hat - tight 16th notes
+                    [true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true],
+                    // Chord - occasional hits
+                    [false, false, true, false, false, false, false, false, false, false, true, false, false, false, false, false]
+                ]
+            },
+            'Trap': {
+                bpm: 140,
+                pattern: [
+                    // Kick - trap hi-hat rolls pattern
+                    [true, false, false, true, false, false, true, false, true, false, false, true, false, false, true, false],
+                    // Snare - heavy on 3 and 7
+                    [false, false, false, false, true, false, false, false, false, false, false, false, true, false, false, false],
+                    // Hi-Hat - rapid trap hats
+                    [true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true],
+                    // Chord - atmospheric stabs
+                    [false, false, false, false, true, false, false, false, false, false, false, false, true, false, false, false]
+                ]
+            },
+            'House': {
+                bpm: 124,
+                pattern: [
+                    // Kick - four-on-the-floor
+                    [true, false, false, false, true, false, false, false, true, false, false, false, true, false, false, false],
+                    // Snare - clap on 2 and 4
+                    [false, false, false, false, true, false, false, false, false, false, false, false, true, false, false, false],
+                    // Hi-Hat - off-beat hats
+                    [false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true],
+                    // Chord - house chord stabs
+                    [true, false, false, false, true, false, false, false, true, false, false, false, true, false, false, false]
+                ]
+            },
+            'Minimal Techno': {
+                bpm: 126,
+                pattern: [
+                    // Kick - minimal kick pattern
+                    [true, false, false, false, false, false, false, true, false, false, false, false, false, false, true, false],
+                    // Snare - occasional clap
+                    [false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false],
+                    // Hi-Hat - sparse techno hats
+                    [true, false, false, false, true, false, false, false, true, false, false, false, true, false, false, false],
+                    // Chord - minimal texture
+                    [false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false]
+                ]
+            },
+            'Downtempo': {
+                bpm: 75,
+                pattern: [
+                    // Kick - slow and deep
+                    [true, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false],
+                    // Snare - relaxed snare
+                    [false, false, false, false, true, false, false, false, false, false, false, false, true, false, false, false],
+                    // Hi-Hat - sparse hats
+                    [true, false, false, false, false, false, true, false, false, false, true, false, false, false, false, false],
+                    // Chord - rich chords
+                    [true, false, false, false, false, false, true, false, false, false, false, false, true, false, false, false]
+                ]
+            },
+            'Ambient': {
+                bpm: 65,
+                pattern: [
+                    // Kick - very sparse
+                    [true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false],
+                    // Snare - almost none
+                    [false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false],
+                    // Hi-Hat - distant
+                    [true, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false],
+                    // Chord - drifting pads
+                    [true, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false]
+                ]
+            },
+            'Reggaeton': {
+                bpm: 95,
+                pattern: [
+                    // Kick - dem bow pattern
+                    [true, false, false, true, false, false, true, false, true, false, false, true, false, false, true, false],
+                    // Snare - reggaeton snare
+                    [false, false, false, false, true, false, false, false, false, false, false, false, true, false, false, false],
+                    // Hi-Hat - dem bow hats
+                    [true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false],
+                    // Chord - occasional
+                    [false, false, false, false, true, false, false, false, false, false, false, false, true, false, false, false]
+                ]
+            }
+        };
+
         this.init();
     }
     
@@ -49,6 +159,7 @@ class LoFiSequencer {
     init() {
         this.cacheDOM();
         this.renderGrid();
+        this.populatePresets();
         this.bindEvents();
         this.updateStatus('Ready to make beats...');
     }
@@ -63,6 +174,8 @@ class LoFiSequencer {
         this.tempoValue = document.getElementById('tempoValue');
         this.clearBtn = document.getElementById('clearBtn');
         this.statusText = document.getElementById('statusText');
+        this.presetSelect = document.getElementById('presetSelect');
+        this.loadPresetBtn = document.getElementById('loadPresetBtn');
     }
     
     /**
@@ -119,7 +232,12 @@ class LoFiSequencer {
         this.clearBtn.addEventListener('click', () => {
             this.clearPattern();
         });
-        
+
+        // Load preset button
+        this.loadPresetBtn.addEventListener('click', () => {
+            this.loadPreset();
+        });
+
         // Keyboard shortcuts
         document.addEventListener('keydown', (e) => {
             if (e.code === 'Space') {
@@ -485,6 +603,53 @@ class LoFiSequencer {
      */
     updateStatus(text) {
         this.statusText.textContent = text;
+    }
+
+    /**
+     * Populate the preset dropdown with available presets
+     */
+    populatePresets() {
+        // Clear existing options except the first one
+        while (this.presetSelect.options.length > 1) {
+            this.presetSelect.remove(1);
+        }
+
+        // Add each preset to the dropdown
+        Object.keys(this.presets).forEach(presetName => {
+            const option = document.createElement('option');
+            option.value = presetName;
+            option.textContent = presetName;
+            this.presetSelect.appendChild(option);
+        });
+    }
+
+    /**
+     * Load the selected preset
+     */
+    loadPreset() {
+        const selectedPreset = this.presetSelect.value;
+
+        if (!selectedPreset) {
+            this.updateStatus('Please select a preset first');
+            return;
+        }
+
+        const preset = this.presets[selectedPreset];
+
+        if (!preset) {
+            this.updateStatus('Preset not found');
+            return;
+        }
+
+        // Set the BPM
+        this.bpm = preset.bpm;
+        this.tempoSlider.value = preset.bpm;
+        this.tempoValue.textContent = preset.bpm;
+
+        // Set the pattern
+        this.setPattern(preset.pattern);
+
+        this.updateStatus(`Loaded preset: ${selectedPreset} (${preset.bpm} BPM)`);
     }
     
     /**

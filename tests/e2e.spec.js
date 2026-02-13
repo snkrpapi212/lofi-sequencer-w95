@@ -84,4 +84,41 @@ test.describe('Lo-Fi Sequencer 95 E2E Tests', () => {
     await expect(stepButtons.nth(1)).not.toHaveClass(/active/);
     await expect(stepButtons.nth(2)).not.toHaveClass(/active/);
   });
+
+  test('Preset dropdown should load a preset', async ({ page }) => {
+    const presetSelect = page.locator('#presetSelect');
+    const loadPresetBtn = page.locator('#loadPresetBtn');
+    const grid = page.locator('#sequencerGrid');
+    const tempoSlider = page.locator('#tempoSlider');
+    const tempoValue = page.locator('#tempoValue');
+
+    // Wait for grid to be generated
+    await grid.waitFor({ state: 'attached' });
+
+    // Verify preset options are available
+    const options = presetSelect.locator('option');
+    await expect(options).toHaveCount(9); // 8 presets + "Select preset..."
+
+    // Select "Classic Lo-Fi" preset
+    await presetSelect.selectOption('Classic Lo-Fi');
+
+    // Click Load button
+    await loadPresetBtn.click();
+
+    // Verify BPM is updated to 85
+    await expect(tempoSlider).toHaveValue('85');
+    await expect(tempoValue).toHaveText('85');
+
+    // Verify some steps are activated (Classic Lo-Fi should have kick on beat 1)
+    const stepButtons = grid.locator('.step-button');
+    await expect(stepButtons.nth(0)).toHaveClass(/active/); // First kick
+
+    // Load a different preset with different BPM
+    await presetSelect.selectOption('Trap');
+    await loadPresetBtn.click();
+
+    // Verify BPM is updated to 140
+    await expect(tempoSlider).toHaveValue('140');
+    await expect(tempoValue).toHaveText('140');
+  });
 });
